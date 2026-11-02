@@ -445,7 +445,7 @@ def run(p, shots):
     J("__tf.openFile('bad-file')")
     time.sleep(0.2)
     nrep = J("document.querySelectorAll('.lrep li').length")
-    check("an open file lists its errors and warnings", J("!!document.querySelector('.lrep.bad')") and nrep == J("__bad.errors.length + __bad.warnings.length"), nrep)
+    check("an open file lists its errors and warnings", J("!!document.querySelector('.lrep.bad')") and nrep == J("__bad.errors.length + __bad.warnings.filter(function(w){ return w.kind !== 'nocheck'; }).length"), nrep)
     check("lines with errors are marked in the source", J("document.querySelectorAll('#srcView .l.le').length") >= 10)
     if shots:
         p.shot(os.path.join(shots, "report.png"))
@@ -460,6 +460,24 @@ def run(p, shots):
           J("document.querySelector('.lrep') && document.querySelector('.lrep').textContent"))
     J("__tf.goFolder('Demo', 'Examples')")
     check("its card shows the checks passing", J("document.querySelector('.fcard .lstat.good') && document.querySelector('.fcard .lstat.good').textContent") == "✓ 3 of 3 checks pass")
+
+    print("AI prompt and dismissing")
+    syn = J("""(async function(){ var t = await fetch('docs/SYNTAX.md').then(function(r){ return r.text(); });
+      var m = /```frame\\n([\\s\\S]*?)\\n```/.exec(t.replace(/\\r/g, '')), d = __tf.parse(m[1]);
+      return { errors: d.errors.map(function(e){ return e.line + ': ' + e.msg; }), warnings: d.warnings.filter(function(w){ return w.kind !== 'nocheck'; }).map(function(w){ return w.msg; }) }; })()""")
+    check("the example in SYNTAX.md loads clean", not syn["errors"] and not syn["warnings"], syn)
+    J("__tf.goFolder('Demo', 'Examples')")
+    prompt = J("__tf.aiPrompt()")
+    check("Copy AI prompt fills in the class and folder and adds the syntax guide",
+          "- Class: Demo" in prompt and "- Folder: Examples" in prompt and "## Rules for a healthy file" in prompt and "[CLASS]" not in prompt, prompt[:300])
+    J("__tf.openFile('bad-file')")
+    time.sleep(0.2)
+    n0 = J("document.querySelectorAll('.lrep li').length")
+    J("document.querySelector('.lrep li .dis').click()")   # the notes panel may cover the right edge
+    check("Dismiss takes an item off the report", J("document.querySelectorAll('.lrep li').length") == n0 - 1 and J("!!document.querySelector('[data-undismiss]')"), (n0, J("document.querySelectorAll('.lrep li').length")))
+    J("document.querySelector('[data-undismiss]').click()")
+    check("Show brings dismissed items back", J("document.querySelectorAll('.lrep li').length") == n0)
+    check("the no-check warning is off by default", J("__tf.settings().checkWarn") is False and "no check" not in J("document.querySelector('.lrep').textContent"))
 
     print("Renderer")
     J("__tf.openFile('demo')")

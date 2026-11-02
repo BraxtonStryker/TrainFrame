@@ -9,7 +9,7 @@
  * - Cache names start with "trainFrame-": every GitHub Pages project of this user shares the origin.
  */
 "use strict";
-const VERSION = "c8105630ee5f"; // generated: tools/sw_version.py --sync
+const VERSION = "1d15eb1b5193"; // generated: tools/sw_version.py --sync
 const CACHE = "trainFrame-" + VERSION;
 const PRECACHE = [
   "./",
@@ -21,7 +21,9 @@ const PRECACHE = [
   "icons/icon-maskable-512.png",
   "icons/apple-touch-icon.png",
   "vendor/katex.min.js",
-  "examples/demo.frame"
+  "examples/demo.frame",
+  "docs/SYNTAX.md",
+  "prompts/generator.md"
 ];
 
 self.addEventListener("install", (event) => {

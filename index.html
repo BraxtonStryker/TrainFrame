@@ -290,6 +290,9 @@
   .lrep li{display:flex; gap:10px; align-items:baseline; padding:5px 0; border-top:1px solid var(--line); font-size:calc(14px * var(--fs))}
   .lrep li .ln{flex:none; background:none; border:none; padding:0; font-family:var(--font-mono); font-size:calc(12.5px * var(--fs)); font-weight:700; text-decoration:underline; text-underline-offset:3px}
   .lrep li.e .ln{color:var(--bad)} .lrep li.w .ln{color:var(--warn)}
+  .lrep li > span{flex:1; min-width:0}
+  .lrep li .dis{flex:none; background:none; border:none; color:var(--muted); font-size:calc(17px * var(--fs)); line-height:1; padding:0 6px; border-radius:6px}
+  .lrep li .dis:hover{color:var(--ink); background:var(--surface-2)}
   .src .l.le{box-shadow:inset 3px 0 0 var(--bad); background:color-mix(in srgb, var(--bad) 7%, transparent)}
   .src .l.lw{box-shadow:inset 3px 0 0 var(--warn)}
   /* ---------- The walkthrough: formula bank, problems, steppers, refs that open in place ---------- */
@@ -550,6 +553,7 @@
         <div class="row">
           <button class="btn sm" id="pasteAdd" type="button">Add pasted text</button>
           <button class="btn sm ghost" id="demoAdd" type="button">Add the demo file</button>
+          <button class="btn sm ghost" id="aiCopy" type="button" title="The instructions and the syntax guide, ready to paste into an AI with an assignment">Copy AI prompt</button>
         </div>
         <ul class="report" id="addReport"></ul>
       </div>
@@ -626,9 +630,12 @@ points: 8
 
 @step Normalize {{F1}}
 $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
-    <p>The full language is in <code>docs/LANGUAGE.md</code> in the TrainFrame repository. It will be built into this page, with a <b>Copy AI prompt</b> button, in a later version.</p>
+    <p>To have an AI write one, use <b>Copy AI prompt</b> and paste the result into the AI with the assignment attached. The prompt holds the instructions and the syntax guide (<code>docs/SYNTAX.md</code>). Inside a class, it fills in that class and folder. The full language is in <code>docs/LANGUAGE.md</code>.</p>
+    <p><button class="btn sm" id="aiCopyHelp" type="button">Copy AI prompt</button></p>
     <h2>What's new</h2>
     <dl class="versions">
+      <dt>0.4.0 (2026-11-02)</dt>
+      <dd><b>Copy AI prompt</b> (in Add files and here in Help) copies instructions and a syntax guide to paste into an AI with an assignment. Load-report items can be dismissed, per file. The warning for answers without a check is off unless you turn it on in Settings.</dd>
       <dt>0.3.0 (2026-11-02)</dt>
       <dd>Files open as walkthroughs: the formula bank with rendered math, each problem with its given, parts and steps (Next step, Show all, Hide), answers with a mark for checks that pass, formula tags that open the formula where you are, callouts and checklists. Your place in each stepper is remembered. Plots and other visuals are placeholders until the next version. The file's source is in a Source box at the bottom.</dd>
       <dt>0.2.0 (2026-11-02)</dt>
@@ -745,7 +752,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 (function(){
   "use strict";
 
-  var APP_VERSION = "0.3.0";
+  var APP_VERSION = "0.4.0";
   var NS = "trainFrame:";   // every GitHub Pages project of this user shares one origin, so namespace every key
   var UNSORTED = "Unsorted";   // the class tab for files with no class: line
   var el = function(id){ return document.getElementById(id); };
@@ -753,7 +760,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   /* ---------- Settings: localStorage trainFrame:settings, missing keys fall back to the defaults ---------- */
   var SETTINGS_DEFAULTS = {
     theme: "system", accent: "teal", reduceMotion: false,                  // Appearance
-    textScale: 1, lineSpacing: 1, font: "system", pageWidth: "normal"       // Text
+    textScale: 1, lineSpacing: 1, font: "system", pageWidth: "normal",      // Text
+    checkWarn: false                                                       // Files
   };
   function loadSettings(){
     var s = {}, out = {};
@@ -1576,7 +1584,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         if (stray) warn(stray.line, "Text right under @problem isn’t shown. Put the problem statement in a @given.");
       }
       if (B.type === "part" && !B.answered && B.problem) warn(B.line, "Part " + B.id + " of " + B.problem.id + " has no @answer.");
-      if (B.type === "answer" && !B.checks.length && B.body.some(function(x){ return /\d/.test(x.text); })) warn(B.line, "This answer has a number but no check: line, so nothing confirms it.");
+      if (B.type === "answer" && !B.checks.length && B.body.some(function(x){ return /\d/.test(x.text); })) warnings.push({ line: B.line, msg: "This answer has a number but no check: line, so nothing confirms it.", kind: "nocheck" });
     });
     var kind = frame.props.kind || "homework";
     if (kind === "homework" || kind === "review") formulas.forEach(function(F){
@@ -1598,21 +1606,31 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       errors: errors, warnings: warnings, checks: checks, blocks: blocks, items: items, lets: frameLets
     };
   }
-  function reportSummary(info){
-    var n = info.checks.length, bad = info.checks.filter(function(c){ return !c.ok; }).length, parts = [];
-    if (info.errors.length) parts.push(plural(info.errors.length, "error"));
-    if (info.warnings.length) parts.push(plural(info.warnings.length, "warning"));
-    return { text: parts.join(" · "), checks: n ? (n - bad) + " of " + plural(n, "check") + " pass" : "", level: info.errors.length ? "bad" : info.warnings.length ? "warn" : "good" };
+  var DISMISSED = {};   // file id -> { "line|message": 1 }: load-report items dismissed (localStorage trainFrame:dismissed)
+  try { DISMISSED = JSON.parse(localStorage.getItem(NS + "dismissed")) || {}; } catch (e){}
+  function saveDismissed(){ try { localStorage.setItem(NS + "dismissed", JSON.stringify(DISMISSED)); } catch (e){} }
+  function issueKey(r){ return r.line + "|" + r.msg; }
+  function issues(info, id){   // the errors and warnings to show: not dismissed, and the no-check warning only when Settings asks for it
+    var gone = (id && DISMISSED[id]) || {}, n = 0;
+    var keep = function(r){ if (gone[issueKey(r)]){ n++; return false; } return true; };
+    return { errors: info.errors.filter(keep), warnings: info.warnings.filter(function(r){ return (settings.checkWarn || r.kind !== "nocheck") && keep(r); }), dismissed: n };
+  }
+  function reportSummary(info, id){
+    var is = issues(info, id), n = info.checks.length, bad = info.checks.filter(function(c){ return !c.ok; }).length, parts = [];
+    if (is.errors.length) parts.push(plural(is.errors.length, "error"));
+    if (is.warnings.length) parts.push(plural(is.warnings.length, "warning"));
+    return { text: parts.join(" · "), checks: n ? (n - bad) + " of " + plural(n, "check") + " pass" : "", level: is.errors.length ? "bad" : is.warnings.length ? "warn" : "good", dismissed: is.dismissed };
   }
   function reportText(id){   // the load report, ready to paste back to whatever wrote the file
     var f = FILES[id], info = INFO[id];
     if (!f || !info) return "";
     var out = ["TrainFrame load report for " + (f.fileName || id + ".frame") + " (@frame {" + id + "}), checked against frame language v" + LANGUAGE_VERSION + "."];
     var list = function(head, rows){ if (!rows.length) return; out.push("", head); rows.forEach(function(r){ out.push("- line " + r.line + ": " + r.msg + "  >  " + (info.lines[r.line - 1] || "").trim()); }); };
-    list("Errors (each one leaves something out of the walkthrough):", info.errors);
-    list("Warnings:", info.warnings);
-    if (!info.errors.length && !info.warnings.length) out.push("", "No errors or warnings.");
-    if (info.checks.length) out.push("", reportSummary(info).checks + ".");
+    var is = issues(info, id);
+    list("Errors (each one leaves something out of the walkthrough):", is.errors);
+    list("Warnings:", is.warnings);
+    if (!is.errors.length && !is.warnings.length) out.push("", "No errors or warnings.");
+    if (info.checks.length) out.push("", reportSummary(info, id).checks + ".");
     out.push("", "Fix these and send back the whole corrected .frame file. The language is described in docs/LANGUAGE.md.");
     return out.join("\n");
   }
@@ -1881,7 +1899,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         var meta = [plural(info.problems.length, "problem"), plural(info.formulas.length, "formula"), "added " + fmtAgo(f.addedAt)];
         html += '<article class="card fcard"><div class="kick">' + esc(info.subtitle || f.fileName || f.id) + '</div>' +
           '<button class="open" type="button" data-open="' + esc(f.id) + '">' + esc(titleOf(f)) + '</button>' +
-          '<div class="meta">' + esc(meta.join(" · ")) + '</div>' + cardStatus(info) +
+          '<div class="meta">' + esc(meta.join(" · ")) + '</div>' + cardStatus(info, f.id) +
           '<div class="acts"><button class="linkbtn" type="button" data-act="move" data-id="' + esc(f.id) + '">Move</button>' +
           '<button class="linkbtn" type="button" data-act="rename" data-id="' + esc(f.id) + '">Rename</button>' +
           '<button class="linkbtn" type="button" data-act="dl" data-id="' + esc(f.id) + '">Download</button>' +
@@ -1897,9 +1915,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     }
     box.innerHTML = html;
   }
-  function cardStatus(info){
+  function cardStatus(info, id){
     if (!info.checks) return "";
-    var sum = reportSummary(info), t = sum.text || (sum.checks ? "\u2713 " + sum.checks : "\u2713 Loaded clean");
+    var sum = reportSummary(info, id), t = sum.text || (sum.checks ? "\u2713 " + sum.checks : "\u2713 Loaded clean");
     return '<div class="lstat ' + sum.level + '">' + esc(t) + '</div>';
   }
   function renderFormulas(cls){
@@ -1948,7 +1966,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         var rec = { id: info.id, text: it.text, fileName: it.name, addedAt: old ? old.addedAt : now, updatedAt: now,
                     cls: old ? old.cls : null, folder: old ? old.folder : null, title: old ? old.title : null };
         FILES[rec.id] = rec; INFO[rec.id] = info;
-        var sum = reportSummary(info);
+        var sum = reportSummary(info, rec.id);
         report.push({ kind: "ok", level: sum.level === "good" ? "" : sum.level, name: it.name, id: rec.id, msg: (old ? "replaced the copy in " : "added to ") + placeLabel(rec) + "." +
           (sum.text ? " " + sum.text + ". Open it to see the load report." : sum.checks ? " Loaded clean: " + sum.checks + "." : " Loaded clean.") });
         return putRecord("files", rec);
@@ -2361,8 +2379,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     needKatex();
     html += renderDoc(id, info);
     var marks = dict();
-    info.warnings.forEach(function(r){ marks[r.line] = "lw"; });
-    info.errors.forEach(function(r){ marks[r.line] = "le"; });
+    var shownIs = issues(info, id);
+    shownIs.warnings.forEach(function(r){ marks[r.line] = "lw"; });
+    shownIs.errors.forEach(function(r){ marks[r.line] = "le"; });
     html += '<details class="srcbox" id="srcBox"><summary>Source</summary><div class="src" id="srcView">' + info.lines.map(function(t, i){
       var n = i + 1, c = "l";
       if (t.charAt(0) === "@") c += " blk"; else if (/^\s*\/\//.test(t)) c += " cm";
@@ -2373,12 +2392,28 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     railBars();
   }
   function loadReportHtml(id, info){
-    var sum = reportSummary(info);
-    if (sum.level === "good") return '<section class="card lrep good"><div class="lrep-h"><b>Loaded clean.</b><span class="muted">' + esc(sum.checks ? sum.checks + "." : "No checks in this file.") + '</span></div></section>';
-    var row = function(r, k){ return '<li class="' + k + '"><button class="ln" type="button" data-jump="' + r.line + '">line ' + r.line + '</button><span>' + esc(r.msg) + '</span></li>'; };
+    var sum = reportSummary(info, id), is = issues(info, id);
+    var undo = sum.dismissed ? '<button class="linkbtn" type="button" data-undismiss="1">Show ' + plural(sum.dismissed, "dismissed item") + '</button>' : "";
+    if (sum.level === "good") return '<section class="card lrep good"><div class="lrep-h"><b>Loaded clean.</b><span class="muted">' + esc(sum.checks ? sum.checks + "." : "No checks in this file.") + '</span><span class="sp"></span>' + undo + '</div></section>';
+    var row = function(r, k){ return '<li class="' + k + '"><button class="ln" type="button" data-jump="' + r.line + '">line ' + r.line + '</button><span>' + esc(r.msg) + '</span>' +
+      '<button class="dis" type="button" data-dismiss="' + esc(issueKey(r)) + '" title="Dismiss" aria-label="Dismiss this item">&times;</button></li>'; };
     return '<section class="card lrep ' + sum.level + '"><div class="lrep-h"><b>' + esc(sum.text) + '</b>' + (sum.checks ? '<span class="muted">' + esc(sum.checks) + '</span>' : "") +
-      '<span class="sp"></span><button class="btn sm subtle" type="button" data-act="copyreport" data-id="' + esc(id) + '">Copy report for AI</button></div>' +
-      '<ul>' + info.errors.map(function(r){ return row(r, "e"); }).join("") + info.warnings.map(function(r){ return row(r, "w"); }).join("") + '</ul></section>';
+      '<span class="sp"></span>' + undo + '<button class="btn sm subtle" type="button" data-act="copyreport" data-id="' + esc(id) + '">Copy report for AI</button></div>' +
+      '<ul>' + is.errors.map(function(r){ return row(r, "e"); }).join("") + is.warnings.map(function(r){ return row(r, "w"); }).join("") + '</ul></section>';
+  }
+  function redrawFile(){ var y = window.scrollY; renderFile(cur); window.scrollTo(0, y); }
+  /* ---------- Copy AI prompt: prompts/generator.md (between its --- lines) with the class and folder filled in, then docs/SYNTAX.md ---------- */
+  function aiPrompt(){
+    var s = SCREEN === "class" && TABS.cur && TABS.cur !== UNSORTED ? cst(TABS.cur) : null;
+    var get = function(u){ return fetch(u).then(function(r){ if (!r.ok) throw new Error(r.status); return r.text(); }); };
+    return Promise.all([get("prompts/generator.md"), get("docs/SYNTAX.md")]).then(function(r){
+      var parts = r[0].replace(/\r\n?/g, "\n").split(/\n---\n/), body = (parts[1] || r[0]).trim();
+      return body.replace("[CLASS]", s ? TABS.cur : "(the class name, as it should appear in TrainFrame)").replace("[FOLDER]", s && s.path ? s.path : "Homework") + "\n\n---\n\n" + r[1].trim() + "\n";
+    });
+  }
+  function copyAi(){
+    aiPrompt().then(function(t){ copyText(t, "Copied the AI prompt. Paste it into the AI and attach the assignment."); },
+      function(){ showToast("The prompt couldn’t be loaded here. It needs the hosted app or a local server.", "OK", null); });
   }
   function copyText(t, done){
     var ok = function(){ showToast(done, "OK", null, "info"); }, no = function(){ showToast("Your browser blocked copying. Download the file and copy the report from here instead.", "OK", null); };
@@ -2559,6 +2594,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       { key: "lineSpacing", label: "Line spacing", type: "select", num: true, options: [[0.92, "Compact"], [1, "Default"], [1.15, "Relaxed"], [1.3, "Loose"]] },
       { key: "font", label: "Font", desc: "Atkinson Hyperlegible is designed to be easy to read for people with low vision. Serif applies to the walkthroughs.", type: "seg", options: [["system", "System"], ["atkinson", "Atkinson"], ["serif", "Serif"]] },
       { key: "pageWidth", label: "Page width", type: "seg", options: [["narrow", "Narrow"], ["normal", "Normal"], ["wide", "Wide"], ["full", "Full"]] }
+    ]},
+    { title: "Files", rows: [
+      { key: "checkWarn", label: "Warn about answers without a check", desc: "Most files don't use check: lines, so this is off. Turn it on to have the load report point out numeric answers that nothing confirms.", type: "switch" }
     ]},
     { title: "Data", rows: [{ type: "custom", render: renderDataRows }] }
   ];
@@ -2815,6 +2853,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     importTexts([{ name: "Pasted text", text: t }]).then(function(r){ if (r.some(function(x){ return x.kind !== "bad"; })) el("pasteBox").value = ""; afterImport(r); });
   });
   el("demoAdd").addEventListener("click", addDemo);
+  el("aiCopy").addEventListener("click", copyAi);
+  el("aiCopyHelp").addEventListener("click", copyAi);
   // drop files anywhere on the page
   var dragDepth = 0;
   var hasFiles = function(e){ return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], "Files") >= 0; };
@@ -2828,8 +2868,10 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   });
 
   el("frameMain").addEventListener("click", function(e){
-    var b = e.target.closest("[data-step], [data-ref], [data-goto]");
+    var b = e.target.closest("[data-step], [data-ref], [data-goto], [data-dismiss], [data-undismiss]");
     if (!b) return;
+    if (b.hasAttribute("data-dismiss")){ (DISMISSED[cur] = DISMISSED[cur] || {})[b.getAttribute("data-dismiss")] = 1; saveDismissed(); redrawFile(); return; }
+    if (b.hasAttribute("data-undismiss")){ delete DISMISSED[cur]; saveDismissed(); redrawFile(); return; }
     if (b.hasAttribute("data-step")) setStepper(b.closest(".stepper"), b.getAttribute("data-step"));
     else if (b.hasAttribute("data-ref")) peek(b);
     else goLine(+b.getAttribute("data-goto").slice(1), true);
@@ -2905,7 +2947,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 
   window.__tf = { files: FILES, info: INFO, notes: NOTES, places: PLACES, classes: CLASSES, tabs: function(){ return JSON.parse(JSON.stringify(TABS)); },
                   get screen(){ return SCREEN; }, get cur(){ return cur; }, get curProblem(){ return curProblem; },
-                  parse: parseFrame, reportText: reportText, evalExpr: function(src, vars){ return evaluate(parseExpr(src), dict(), vars); }, fmtNum: fmtNum,
+                  parse: parseFrame, aiPrompt: aiPrompt, settings: function(){ return settings; }, reportText: reportText, evalExpr: function(src, vars){ return evaluate(parseExpr(src), dict(), vars); }, fmtNum: fmtNum,
                   importTexts: importTexts, afterImport: afterImport, openFile: openFile, openClass: openClass, closeFile: closeFile, closeClass: closeClass,
                   showSection: showSection, goFolder: goFolder, showScreen: showScreen, clsOf: clsOf, goLine: goLine,
                   flush: function(){ if (noteTimer) saveNote(); return saveChain; } };

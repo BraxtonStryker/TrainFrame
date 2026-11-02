@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+__pycache__/
+.claude/
+
+# Real homework solutions stay on this computer (the repo is public for GitHub Pages)
+examples-private/
+ECEN 305 HW3 Walkthrough.html
+ELEN304 HW3 Walkthrough.html

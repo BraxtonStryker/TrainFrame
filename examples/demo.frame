@@ -1,0 +1,128 @@
+// TrainFrame demo: two invented problems that show what a frame file can do.
+// The language is described in docs/LANGUAGE.md.
+
+@frame {demo}
+title: A Tour of TrainFrame
+class: Demo
+folder: Examples
+subtitle: Invented problems · not from any course
+fact: Problems = 2
+fact: Points = 10
+fact: Language = v0.2
+steps: per part
+Each part opens on its first step. Try the next move on paper, then reveal the step to check it. Tags like F2 open the formula a step uses, right where you are.
+
+@formula {F1} Exponential PDF
+group: Distributions
+$$ f_T(t) = \lambda e^{-\lambda t}, \qquad t \ge 0 $$
+The waiting time until the first arrival, when arrivals come at rate $\lambda$.
+
+@formula {F2} Exponential CDF
+group: Distributions
+$$ F_T(t) = 1 - e^{-\lambda t}, \qquad t \ge 0 $$
+
+@formula {F3} Memoryless property
+group: Distributions
+$$ P[T > s + t \mid T > s] = P[T > t] $$
+
+@formula {F4} RC step response
+group: Circuits
+$$ v_C(t) = V_s\left(1 - e^{-t/RC}\right), \qquad t \ge 0 $$
+The capacitor charges toward $V_s$ with time constant $\tau = RC$.
+
+
+// ---------------- Problem 1 ----------------
+
+@problem {P1} Waiting for a bus
+points: 6
+short: Exponential wait
+let lam = 0.2
+let f(t) = if(t >= 0, lam * exp(-lam * t), 0)
+let F(t) = if(t >= 0, 1 - exp(-lam * t), 0)
+
+@given
+Buses arrive at an average rate of $\lambda = 0.2$ per minute, so your wait $T$ is exponential ({{F1}}).
+
+@plot Density of the wait
+t: -1 to 20; ticks every 5; label "t (min)"
+y: 0 to 0.22; ticks 0, 0.1, 0.2
+curve f; legend "$f_T(t)$"
+
+view Part a
+shade f from 0 to 5
+caption: Shaded area $= F_T(5) \approx {= F(5) : 3}$.
+
+view Explore
+slider b: 0 to 20; step 0.5; start 10; label "Wait up to $b$ minutes"
+shade f from 0 to b
+caption: $P[T \le b] = {= F(b) : 3}$
+
+@part {a}
+points: 3
+Find the probability that you wait at most 5 minutes.
+
+@step Pick the CDF {{F2}}
+"At most 5 minutes" means $P[T \le 5]$, which is $F_T(5)$.
+
+@step Plug in
+$$ F_T(5) = 1 - e^{-0.2 \cdot 5} = 1 - e^{-1} $$
+
+@answer
+$$ P[T \le 5] = 1 - e^{-1} \approx 0.632 $$
+check: integral(t = 0 to 5, f(t)) = 0.632
+
+@part {b}
+points: 3
+You've already waited 5 minutes. Find the probability that you wait at least 5 more.
+
+@step Use memorylessness {{F3}}
+The time you've already spent doesn't change the wait still ahead:
+$$ P[T > 10 \mid T > 5] = P[T > 5] $$
+
+@step Use the CDF {{F2}}
+$$ P[T > 5] = 1 - F_T(5) = e^{-1} $$
+
+@answer
+$$ P[T > 10 \mid T > 5] = e^{-1} \approx 0.368 $$
+check: (1 - F(10)) / (1 - F(5)) = 0.368
+
+
+// ---------------- Problem 2 ----------------
+
+@problem {P2} Charging a capacitor
+points: 4
+short: RC charging
+let Vs = 5
+let R = 1000
+let C = 0.001
+let v(t) = if(t >= 0, Vs * (1 - exp(-t / (R * C))), 0)
+
+@given
+A $1\,\text{k}\Omega$ resistor and a $1\,\text{mF}$ capacitor are switched onto a $5\,\text{V}$ source at $t = 0$. The capacitor starts uncharged.
+
+@part {a}
+points: 4
+How long does the capacitor take to reach 4 V?
+
+@step Find the time constant {{F4}}
+$$ \tau = RC = (1000)(0.001) = 1\ \text{s} $$
+
+@step Solve for t
+$$ 4 = 5\left(1 - e^{-t}\right) \;\Longrightarrow\; e^{-t} = 0.2 \;\Longrightarrow\; t = \ln 5 $$
+
+@answer
+$$ t = \ln 5 \approx 1.609\ \text{s} $$
+check: v(ln(5)) = 4
+
+@plot Check it · the charging curve
+place: after steps
+t: -0.5 to 5; ticks every 1; label "t (s)"
+y: 0 to 5.5; ticks 0, 1, 2, 3, 4, 5; label "$v_C$ (V)"
+curve v; legend "$v_C(t)$"
+mark y = 4; dashed; label "4 V"
+mark x = ln(5); label "t = ln 5"
+caption: The curve crosses 4 V at $t = \ln 5 \approx {= ln(5) : 3}$ s, a little over one time constant.
+
+@checklist Before you submit
+- Every probability is between 0 and 1.
+- Every time has its unit.

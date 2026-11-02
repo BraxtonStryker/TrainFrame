@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Maskable variant: full-bleed background, artwork inside the 80% safe zone -->
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14A396"/><stop offset="1" stop-color="#0B5F59"/></linearGradient></defs>
+  <rect width="512" height="512" fill="url(#g)"/>
+  <g transform="translate(256 256) scale(.72) translate(-256 -256)">
+    <rect x="84" y="96" width="344" height="320" rx="34" fill="#FFFFFF"/>
+    <path d="M132 300C188 300 204 156 256 156S324 300 380 300" fill="none" stroke="#0F766E" stroke-width="26" stroke-linecap="round"/>
+    <path d="M132 300C188 300 204 156 256 156V300Z" fill="#0F766E" fill-opacity=".28"/>
+    <path d="M132 362H380" stroke="#0F766E" stroke-opacity=".35" stroke-width="14" stroke-linecap="round"/>
+    <path d="M132 362H256" stroke="#0F766E" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="256" cy="362" r="25" fill="#0F766E" stroke="#FFFFFF" stroke-width="10"/>
+  </g>
+</svg>

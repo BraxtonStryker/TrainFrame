@@ -292,6 +292,55 @@
   .lrep li.e .ln{color:var(--bad)} .lrep li.w .ln{color:var(--warn)}
   .src .l.le{box-shadow:inset 3px 0 0 var(--bad); background:color-mix(in srgb, var(--bad) 7%, transparent)}
   .src .l.lw{box-shadow:inset 3px 0 0 var(--warn)}
+  /* ---------- The walkthrough: formula bank, problems, steppers, refs that open in place ---------- */
+  #frameMain [id^="L"]{scroll-margin-top:calc(var(--stick, 0px) + 20px)}
+  #frameMain .flash{outline:2px solid var(--accent); outline-offset:3px}
+  .fbank, .tfprob, .tfsec, .checklist{margin-top:30px}
+  .fbank > h2, .tfsec > h2, .checklist > h2{font-size:calc(20px * var(--fs)); margin-bottom:10px}
+  .fgrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px}
+  .fcardx{padding:12px 14px; min-width:0}
+  .fcardx.wide{grid-column:1/-1} .fcardx.hl{border-color:var(--accent)}
+  .fch{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+  .fid, .pid{font-family:var(--font-mono); font-weight:700; color:var(--accent)}
+  .fgrp{margin-left:auto; font-size:calc(12px * var(--fs)); color:var(--muted)}
+  .fused{margin-top:6px; font-size:calc(12.5px * var(--fs)); color:var(--muted)}
+  .fmain p{margin:8px 0}
+  .dmath{overflow-x:auto; overflow-y:hidden; margin:8px 0; padding:2px 0}
+  .ph{display:flex; align-items:baseline; gap:12px; border-bottom:2px solid var(--line); padding-bottom:6px; margin-bottom:12px}
+  .ph h2{font-size:calc(22px * var(--fs)); flex:1}
+  .pts{font-size:calc(12.5px * var(--fs)); color:var(--muted); font-weight:650; margin-left:8px}
+  .given, .plan{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 14px; margin:10px 0}
+  .given h3, .plan h3{font-size:calc(12.5px * var(--fs)); text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+  .part{margin:18px 0 8px}
+  .plbl{font-weight:750; color:var(--accent); margin-right:8px}
+  .stepper{margin:8px 0 18px}
+  .unit{margin-bottom:8px}
+  .step, .ans{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 14px}
+  .step.key{border-left:4px solid var(--accent)} .step.aside{opacity:.8}
+  .ans{border-left:4px solid var(--good)}
+  .unit > .part{margin-top:4px}
+  .sh{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+  .sn{font-size:calc(11.5px * var(--fs)); font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+  .ctl{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .ctl .cnt{color:var(--muted); font-size:calc(13px * var(--fs)); font-variant-numeric:tabular-nums}
+  .ref{border:1px dashed var(--accent); background:var(--accent-soft); color:var(--accent); border-radius:6px; padding:0 6px; margin:0 2px; font-family:var(--font-mono); font-size:calc(12.5px * var(--fs)); font-weight:700}
+  .ref.on{border-style:solid}
+  .peek{border:1px solid var(--accent); border-radius:var(--radius-sm); padding:8px 12px; margin:6px 0; background:var(--surface-2)}
+  .chk{font-size:calc(12px * var(--fs)); font-weight:650; margin-left:auto} .chk.ok{color:var(--good)} .chk.bad{color:var(--bad)}
+  .callout{border-left:4px solid var(--accent); background:var(--accent-soft); padding:8px 14px; border-radius:var(--radius-sm); margin:10px 0}
+  .callout.warning{border-left-color:var(--warn); background:var(--warn-soft)} .callout.tip{border-left-color:var(--good); background:var(--good-soft)}
+  .vis{border:1px dashed var(--line-2); border-radius:var(--radius-sm); padding:10px 14px; margin:10px 0; color:var(--muted); font-size:calc(14px * var(--fs))}
+  .vis figcaption{color:var(--ink)}
+  .vis p{margin:4px 0 0}
+  .tbl{overflow-x:auto}
+  .tbl table{border-collapse:collapse; margin:8px 0}
+  .tbl th, .tbl td{border:1px solid var(--line); padding:4px 10px; text-align:left}
+  .explain{margin-top:6px} .explain summary{cursor:pointer; color:var(--accent); font-weight:600}
+  .checklist{padding:12px 16px}
+  .ticks{list-style:none; padding-left:0}
+  .texsrc{font-size:calc(13px * var(--fs))}
+  .srcbox{margin-top:36px}
+  .srcbox > summary{cursor:pointer; color:var(--muted); font-weight:650; margin-bottom:8px}
   .pending{border-left:4px solid var(--accent); background:var(--accent-soft); padding:12px 16px; border-radius:var(--radius-sm); margin:22px 0 16px; font-family:var(--font-body); font-size:calc(14.5px * var(--fs))}
   .pending p{margin:0}
   .src{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:10px 0; font-family:var(--font-mono); font-size:calc(13px * var(--fs)); line-height:1.6; overflow-x:auto}
@@ -580,6 +629,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     <p>The full language is in <code>docs/LANGUAGE.md</code> in the TrainFrame repository. It will be built into this page, with a <b>Copy AI prompt</b> button, in a later version.</p>
     <h2>What's new</h2>
     <dl class="versions">
+      <dt>0.3.0 (2026-11-02)</dt>
+      <dd>Files open as walkthroughs: the formula bank with rendered math, each problem with its given, parts and steps (Next step, Show all, Hide), answers with a mark for checks that pass, formula tags that open the formula where you are, callouts and checklists. Your place in each stepper is remembered. Plots and other visuals are placeholders until the next version. The file's source is in a Source box at the bottom.</dd>
       <dt>0.2.0 (2026-11-02)</dt>
       <dd>Files are checked when they load. Every <code>check:</code> line is worked out, and a load report on the file lists errors and warnings with their line numbers. Click one to jump to it, or use <b>Copy report for AI</b> to send it back to whatever wrote the file. File cards and the Add files report show the result too. Open files share one row of tabs, and the formula bank and the calculator sit on the right edge with your notes.</dd>
       <dt>0.1.0 (2026-11-02)</dt>
@@ -694,7 +745,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 (function(){
   "use strict";
 
-  var APP_VERSION = "0.2.0";
+  var APP_VERSION = "0.3.0";
   var NS = "trainFrame:";   // every GitHub Pages project of this user shares one origin, so namespace every key
   var UNSORTED = "Unsorted";   // the class tab for files with no class: line
   var el = function(id){ return document.getElementById(id); };
@@ -2093,6 +2144,190 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     nav(function(){ if (TABS.cur === cls) SCREEN = "home"; });
   }
 
+  /* ---------- The renderer: a parsed file as a walkthrough (formula bank, problems, steps shown one at a time) ---------- */
+  var PROG = {};   // file id -> { stepper key: how many of its steps show, "c<line>": a ticked checklist item } (localStorage trainFrame:progress)
+  try { PROG = JSON.parse(localStorage.getItem(NS + "progress")) || {}; } catch (e){}
+  var STEPPERS = {};   // stepper key -> { total, prob } for the file showing
+  function saveProg(){ try { localStorage.setItem(NS + "progress", JSON.stringify(PROG)); } catch (e){} }
+  function prog(id){ return PROG[id] || (PROG[id] = {}); }
+  function tex(src, disp){
+    if (katexState === 2 && window.katex){ try { return window.katex.renderToString(src, { displayMode: disp, output: "mathml", throwOnError: false }); } catch (e){} }
+    return '<code class="texsrc">' + esc(src) + '</code>';
+  }
+  function live(text, L){   // {= expr : d} becomes its value (until the visuals land, sliders aren't in play)
+    return text.replace(LIVE_RE, function(all, src, d){ try { return fmtNum(evaluate(parseExpr(src), L), d == null ? 3 : +d); } catch (e){ return "?"; } });
+  }
+  function inline(t){   // math, code, refs and light Markdown inside one line of text
+    var keep = [], put = function(h){ keep.push(h); return "\u0000" + (keep.length - 1) + "\u0000"; };
+    t = String(t).replace(/\\\$/g, function(){ return put("$"); })
+      .replace(/\$\$([^$]+?)\$\$/g, function(a, m){ return put(tex(m, true)); })
+      .replace(/\$([^$\n]+?)\$/g, function(a, m){ return put(tex(m, false)); })
+      .replace(/`([^`]+)`/g, function(a, c){ return put("<code>" + esc(c) + "</code>"); });
+    t = esc(t).replace(/\{\{\s*([A-Za-z0-9_.-]+)\s*\}\}/g, '<button class="ref" type="button" data-ref="$1">$1</button>')
+      .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\*([^*\s][^*]*)\*/g, "<i>$1</i>").replace(/==([^=]+)==/g, "<mark>$1</mark>");
+    return t.replace(/\u0000(\d+)\u0000/g, function(a, k){ return keep[+k]; });
+  }
+  function cellsOf(row){   // a table row's cells, not splitting at | inside $math$
+    var out = [], cur = "", inMath = false;
+    row = row.trim().replace(/^\|/, "").replace(/\|$/, "");
+    for (var k = 0; k < row.length; k++){ var ch = row.charAt(k); if (ch === "$") inMath = !inMath; if (ch === "|" && !inMath){ out.push(cur.trim()); cur = ""; } else cur += ch; }
+    out.push(cur.trim());
+    return out;
+  }
+  function md(text, L, ticks){   // a block's body: paragraphs, $$ display math $$, lists, tables. ticks: checklist boxes { line -> on }
+    var lines = live(text, L).split("\n"), out = "", i = 0;
+    while (i < lines.length){
+      var s = lines[i].trim();
+      if (!s){ i++; continue; }
+      if (s.indexOf("$$") === 0){
+        var buf = s.slice(2), j = i;
+        while (buf.indexOf("$$") < 0 && ++j < lines.length) buf += "\n" + lines[j];
+        var end = buf.indexOf("$$"), after = end >= 0 ? buf.slice(end + 2).trim() : "";
+        out += '<div class="dmath">' + tex(end >= 0 ? buf.slice(0, end) : buf, true) + '</div>' + (after ? "<p>" + inline(after) + "</p>" : "");
+        i = j + 1; continue;
+      }
+      if (s.charAt(0) === "|"){
+        var rows = [];
+        while (i < lines.length && lines[i].trim().charAt(0) === "|") rows.push(lines[i++]);
+        var body = rows.slice(rows[1] && /^[\s|:-]+$/.test(rows[1]) ? 2 : 1);
+        out += '<div class="tbl"><table><thead><tr>' + cellsOf(rows[0]).map(function(c){ return "<th>" + inline(c) + "</th>"; }).join("") + '</tr></thead><tbody>' +
+          body.map(function(r){ return "<tr>" + cellsOf(r).map(function(c){ return "<td>" + inline(c) + "</td>"; }).join("") + "</tr>"; }).join("") + '</tbody></table></div>';
+        continue;
+      }
+      if (/^([-*]|\d+\.)\s/.test(s)){
+        var ol = /^\d/.test(s), items = [];
+        while (i < lines.length && /^\s*([-*]|\d+\.)\s/.test(lines[i])) items.push(lines[i++].trim().replace(/^([-*]|\d+\.)\s+/, ""));
+        out += (ol ? "<ol>" : "<ul" + (ticks ? ' class="ticks"' : "") + ">") + items.map(function(t, k){
+          return ticks ? '<li><label><input type="checkbox" data-tick="' + k + '"' + (ticks[k] ? " checked" : "") + '> <span>' + inline(t) + '</span></label></li>' : "<li>" + inline(t) + "</li>";
+        }).join("") + (ol ? "</ol>" : "</ul>");
+        continue;
+      }
+      var para = [];
+      while (i < lines.length && lines[i].trim() && !/^\s*(\$\$|\||([-*]|\d+\.)\s)/.test(lines[i])) para.push(lines[i++].trim());
+      out += "<p>" + inline(para.join(" ")) + "</p>";
+    }
+    return out;
+  }
+  function bodyOf(B){ return B.body.map(function(x){ return x.text; }).join("\n"); }
+  var VIS_NAMES = dict({ plot: "Plot", stem: "Stem plot", phasor: "Phasor diagram", table: "Live table", calc: "Calculator" });
+  function attachedHtml(list, L, later){   // callouts and visuals under a block; "place: after steps" visuals wait in `later`
+    return list.map(function(A){
+      if (A.vis && A.vis.place === "after steps" && later){ later.push(A); return ""; }
+      return A.vis ? visualHtml(A) : calloutHtml(A, L);
+    }).join("");
+  }
+  function calloutHtml(A, L){
+    return '<aside class="callout ' + A.type + '" id="L' + A.line + '"><b>' + (A.title ? inline(A.title) : A.type.charAt(0).toUpperCase() + A.type.slice(1)) + '</b>' + md(bodyOf(A), L) + '</aside>';
+  }
+  function visualHtml(A){
+    var kinds = A.vis.panels.map(function(p){ return VIS_NAMES[p.kind]; }).filter(function(k, i, a){ return a.indexOf(k) === i; });
+    return '<figure class="vis" id="L' + A.line + '"><figcaption><b>' + esc(kinds.join(" + ")) + '</b>' + (A.title ? ' · ' + inline(A.title) : "") + '</figcaption>' +
+      '<p>Interactive ' + esc(kinds.join(" and ").toLowerCase()) + (A.vis.views.length ? " with " + esc(A.vis.views.map(function(v){ return v.name; }).join(" / ")) + " views" : "") + '. Visuals are the next part of TrainFrame to be built.</p></figure>';
+  }
+  function checkBadge(B){
+    var recs = B.checkRecs || [];
+    if (!recs.length) return "";
+    var bad = recs.filter(function(c){ return !c.ok; }).length;
+    return '<span class="chk ' + (bad ? "bad" : "ok") + '" title="' + esc(recs.map(function(c){ return (c.ok ? "✓ " : "✗ ") + c.text; }).join("\n")) + '">' + (bad ? "✗ " + bad + " check" + (bad > 1 ? "s" : "") + " failed" : "✓ checked") + '</span>';
+  }
+  function renderDoc(id, info){
+    var P = prog(id), html = "", L0 = info.lets;
+    STEPPERS = {};
+    var bank = info.blocks.filter(function(B){ return B.type === "formula" || B.type === "definition"; });
+    var usedIn = dict();   // formula id -> the problems that refer to it
+    info.problems.forEach(function(p){
+      var pb = info.blocks.filter(function(B){ return B.problem && B.problem.id === p.id; }), txt = pb.map(function(B){ return B.title + "\n" + bodyOf(B) + "\n" + (B.uses || []).map(function(u){ return "{{" + u + "}}"; }).join(" "); }).join("\n");
+      bank.forEach(function(F){ if (txt.indexOf("{{" + F.id + "}}") >= 0) (usedIn[F.id] = usedIn[F.id] || []).push(p.id); });
+    });
+    if (bank.length) html += '<section class="fbank" id="fbank"><h2>Formula bank</h2><div class="fgrid">' + bank.map(function(F){
+      var style = F.props.style === "wide" ? " wide" : F.props.style === "highlight" ? " hl" : "";
+      return '<div class="card fcardx' + style + '" id="L' + F.line + '" data-fid="' + esc(F.id) + '"><div class="fch"><span class="fid">' + esc(F.id) + '</span><b>' + inline(F.title) + '</b>' +
+        (F.props.group ? '<span class="fgrp">' + esc(F.props.group) + '</span>' : "") + '</div>' + md(bodyOf(F), L0) +
+        (usedIn[F.id] ? '<div class="fused">Used in ' + usedIn[F.id].map(function(p){ return '<button class="ref" type="button" data-ref="' + esc(p) + '">' + esc(p) + '</button>'; }).join(" ") + '</div>' : "") + '</div>';
+    }).join("") + '</div></section>';
+    info.items.forEach(function(B){
+      if (B.type === "problem") html += problemHtml(id, P, B, info);
+      else if (B.type === "section") html += '<section class="tfsec" id="L' + B.line + '"><h2>' + inline(B.title) + '</h2>' + md(bodyOf(B), L0) + attachedHtml(B.attached, L0) + '</section>';
+      else if (B.type === "checklist"){
+        var ticks = {}; Object.keys(P).forEach(function(k){ var m = /^c(\d+):(\d+)$/.exec(k); if (m && +m[1] === B.line) ticks[+m[2]] = P[k]; });
+        html += '<section class="card checklist" id="L' + B.line + '" data-cl="' + B.line + '"><h2>' + inline(B.title || "Checklist") + '</h2>' + md(bodyOf(B), L0, ticks) + '</section>';
+      }
+      else if (B.vis) html += visualHtml(B);
+      else if (B.spec.callout) html += calloutHtml(B, L0);
+    });
+    return html;
+  }
+  function problemHtml(id, P, B, info){
+    var L = B.L, perProblem = (B.props.steps || info.steps) === "per problem", later = [], h = "", unit = [], n = 0, label = null;
+    var pts = B.props.points ? (/^\d+(\.\d+)?$/.test(B.props.points) ? B.props.points + " pts" : B.props.points) : "";
+    var flush = function(){   // close the stepper being built: its units, then Next step / Show all / Hide
+      if (!unit.length) return;
+      var key = B.id + ":" + (n++), total = unit.length, shown = Math.min(P[key] == null ? 1 : P[key], total);
+      STEPPERS[key] = { total: total, prob: B.id };
+      h += '<div class="stepper" data-sk="' + esc(key) + '">' + unit.map(function(u, k){ return '<div class="unit"' + (k >= shown ? " hidden" : "") + '>' + u + '</div>'; }).join("") +
+        '<div class="ctl"><button class="btn sm" type="button" data-step="next"' + (shown >= total ? " disabled" : "") + '>Next step</button>' +
+        '<button class="btn sm ghost" type="button" data-step="all">Show all</button><button class="btn sm ghost" type="button" data-step="hide">Hide</button>' +
+        '<span class="cnt">' + shown + ' / ' + total + '</span></div></div>';
+      unit = [];
+    };
+    var partHead = function(x){ return '<div class="part" id="L' + x.line + '"><span class="plbl">' + (x.id.length === 1 ? "(" + esc(x.id) + ")" : "Part " + esc(x.id)) + '</span>' +
+      (x.title ? '<b>' + inline(x.title) + '</b>' : "") + (x.props.points ? '<span class="pts">' + esc(x.props.points) + ' pts</span>' : "") + md(bodyOf(x), L) + attachedHtml(x.attached, L, later) + '</div>'; };
+    var steps = 0;
+    B.items.forEach(function(x){
+      if (x.type === "given" || x.type === "plan"){
+        flush();
+        h += '<div class="' + x.type + '" id="L' + x.line + '"><h3>' + (x.title ? inline(x.title) : x.type === "given" ? "Given" : "Plan") + '</h3>' + md(bodyOf(x), L) + attachedHtml(x.attached, L, later) + '</div>';
+      } else if (x.type === "part"){
+        if (perProblem) label = partHead(x); else { flush(); h += partHead(x); }
+      } else {
+        var body;
+        if (x.type === "step") body = '<div class="step' + (x.props.style ? " " + esc(x.props.style) : "") + '" id="L' + x.line + '"><div class="sh"><span class="sn">Step ' + (++steps) + '</span><b>' + inline(x.title) + '</b>' +
+          (x.uses || []).map(function(u){ return '<button class="ref" type="button" data-ref="' + esc(u) + '">' + esc(u) + '</button>'; }).join("") + checkBadge(x) + '</div>' + md(bodyOf(x), L) + attachedHtml(x.attached, L, later) + '</div>';
+        else if (x.type === "answer") body = '<div class="ans" id="L' + x.line + '"><div class="sh"><b>Answer</b>' + checkBadge(x) + '</div>' + md(bodyOf(x), L) + attachedHtml(x.attached, L, later) + '</div>';
+        else body = '<details class="explain" id="L' + x.line + '"><summary>Explain: ' + inline(x.title) + '</summary>' + md(bodyOf(x), L) + '</details>';
+        unit.push((label || "") + body); label = null;
+      }
+    });
+    flush();
+    if (label) h += label;
+    return '<section class="tfprob" id="L' + B.line + '" data-p="' + esc(B.id) + '"><header class="ph"><span class="pid">' + esc(B.props.label || B.id) + '</span><h2>' + inline(B.title) + '</h2>' +
+      (pts ? '<span class="pts">' + esc(pts) + '</span>' : "") + '</header>' + attachedHtml(B.attached, L, later) + h + later.map(function(A){ return A.vis ? visualHtml(A) : calloutHtml(A, L); }).join("") + '</section>';
+  }
+  function setStepper(box, how){   // Next step / Show all / Hide, done in place so the page doesn't jump
+    var key = box.getAttribute("data-sk"), s = STEPPERS[key], P = prog(cur);
+    if (!s) return;
+    var n = P[key] == null ? 1 : P[key];
+    n = how === "next" ? Math.min(n + 1, s.total) : how === "all" ? s.total : 0;
+    P[key] = n; saveProg();
+    Array.prototype.forEach.call(box.children, function(u, k){ if (u.classList.contains("unit")) u.hidden = k >= n; });
+    box.querySelector('[data-step="next"]').disabled = n >= s.total;
+    box.querySelector(".cnt").textContent = n + " / " + s.total;
+    if (how === "next" && n > 0){ var u = box.children[n - 1]; if (u.getBoundingClientRect().bottom > window.innerHeight) u.scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" }); }
+    railBars();
+  }
+  function railBars(){   // each problem's bar: the share of its steps showing
+    var P = prog(cur), by = dict();
+    Object.keys(STEPPERS).forEach(function(k){ var s = STEPPERS[k], b = by[s.prob] || (by[s.prob] = [0, 0]); b[0] += Math.min(P[k] == null ? 1 : P[k], s.total); b[1] += s.total; });
+    Array.prototype.forEach.call(el("rail").querySelectorAll("a[data-p]"), function(a){ var b = by[a.getAttribute("data-p")], i = a.querySelector(".bar i"); if (i) i.style.width = b && b[1] ? Math.round(100 * b[0] / b[1]) + "%" : "0"; });
+  }
+  function peek(btn){   // a {{ref}}: a formula opens right under where you are; a problem scrolls to it
+    var ref = btn.getAttribute("data-ref"), card = document.querySelector('#fbank [data-fid="' + ref + '"]');
+    if (!card){
+      var dot = ref.indexOf("."), base = dot < 0 ? ref : ref.slice(0, dot), info = INFO[cur], t = null;
+      if (dot >= 0 && info) info.blocks.forEach(function(B){ if (B.type === "part" && B.problem && B.problem.id === base && B.id === ref.slice(dot + 1)) t = el("L" + B.line); });
+      t = t || document.querySelector('#frameMain .tfprob[data-p="' + base + '"]');
+      if (t) t.scrollIntoView({ block: "start", behavior: reduceMotion() ? "auto" : "smooth" });
+      return;
+    }
+    var host = btn.closest("p, li, td, .sh, .fused, .dmath") || btn.parentNode, next = host.nextElementSibling;
+    if (next && next.classList.contains("peek") && next.getAttribute("data-of") === ref){ next.remove(); btn.classList.remove("on"); return; }
+    var pk = document.createElement("div");
+    pk.className = "peek"; pk.setAttribute("data-of", ref);
+    pk.innerHTML = card.innerHTML.replace(/<div class="fused">[\s\S]*<\/div>$/, "") + '<button class="linkbtn" type="button" data-goto="' + card.id + '">Open in the formula bank</button>';
+    host.parentNode.insertBefore(pk, host.nextSibling);
+    btn.classList.add("on");
+  }
+
   /* ---------- An open file ---------- */
   var curProblem = null, spyTick = 0;
   function renderFile(id){
@@ -2123,21 +2358,19 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     if (info.facts.length) html += '<div class="facts">' + info.facts.map(function(x){ return '<span class="fact">' + (x[0] ? '<b>' + esc(x[0]) + '</b>' : "") + esc(x[1]) + '</span>'; }).join("") + '</div>';
     if (info.intro.length) html += '<div class="intro">' + info.intro.map(function(p){ return '<p>' + esc(p) + '</p>'; }).join("") + '</div>';
     html += '</header>' + loadReportHtml(id, info);
-    html += '<div class="pending"><p>The renderer that turns this into steps, formula cards and plots is the next part of TrainFrame to be built. Until then, here\u2019s the file\u2019s source.</p></div>';
+    needKatex();
+    html += renderDoc(id, info);
     var marks = dict();
     info.warnings.forEach(function(r){ marks[r.line] = "lw"; });
     info.errors.forEach(function(r){ marks[r.line] = "le"; });
-    var probLines = {}, fxLine = info.formulas.length ? info.formulas[0].line : -1;
-    info.problems.forEach(function(p){ probLines[p.line] = p.id; });
-    html += '<div class="src" id="srcView">' + info.lines.map(function(t, i){
+    html += '<details class="srcbox" id="srcBox"><summary>Source</summary><div class="src" id="srcView">' + info.lines.map(function(t, i){
       var n = i + 1, c = "l";
       if (t.charAt(0) === "@") c += " blk"; else if (/^\s*\/\//.test(t)) c += " cm";
-      if (probLines[n]) c += " prob";
-      if (n === fxLine) c += " fx";
       if (marks[n]) c += " " + marks[n];
-      return '<div class="' + c + '" id="L' + n + '"' + (probLines[n] ? ' data-p="' + esc(probLines[n]) + '"' : "") + '><span class="no">' + n + '</span><span class="tx">' + (esc(t) || " ") + '</span></div>';
-    }).join("") + '</div>';
+      return '<div class="' + c + '" id="S' + n + '"><span class="no">' + n + '</span><span class="tx">' + (esc(t) || " ") + '</span></div>';
+    }).join("") + '</div></details>';
     el("frameMain").innerHTML = html;
+    railBars();
   }
   function loadReportHtml(id, info){
     var sum = reportSummary(info);
@@ -2151,8 +2384,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     var ok = function(){ showToast(done, "OK", null, "info"); }, no = function(){ showToast("Your browser blocked copying. Download the file and copy the report from here instead.", "OK", null); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, no); else no();
   }
-  function goLine(n, flash){
+  function goLine(n, flash){   // the rendered block for line n, or the source line when that block is hidden or there is none
     var t = el("L" + n);
+    if (!t || !t.offsetParent){ if (el("srcBox")) el("srcBox").open = true; t = el("S" + n); }
     if (!t) return;
     t.scrollIntoView({ block: flash ? "center" : "start", behavior: reduceMotion() || flash ? "auto" : "smooth" });
     if (flash){ t.classList.add("flash"); setTimeout(function(){ t.classList.remove("flash"); }, 1600); }
@@ -2160,9 +2394,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   function spy(){   // the problem you're reading: the last one whose heading has scrolled up past the sticky bars
     if (!cur || SCREEN !== "class") return;
     var stick = document.querySelector(".appbar").offsetHeight + el("fstrip").offsetHeight + el("chead").offsetHeight, top = stick + (window.innerWidth <= 900 ? 60 : 40), now = null;
-    var heads = document.querySelectorAll("#srcView .prob");
+    var heads = document.querySelectorAll("#frameMain .tfprob");
     for (var i = 0; i < heads.length; i++){ if (heads[i].getBoundingClientRect().top <= top + 4) now = heads[i].getAttribute("data-p"); else break; }
-    var fx = document.querySelector("#srcView .fx");
+    var fx = el("fbank");
     var inFx = !now && fx && fx.getBoundingClientRect().top <= top + 4;
     curProblem = now;
     Array.prototype.forEach.call(el("rail").querySelectorAll("a"), function(a){
@@ -2181,7 +2415,11 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     if (katexState) return;
     katexState = 1;
     var sc = document.createElement("script"); sc.src = "vendor/katex.min.js";
-    sc.onload = function(){ katexState = 2; if (!el("fxPanel").classList.contains("hidden")) renderFx(); };
+    sc.onload = function(){
+      katexState = 2;
+      if (!el("fxPanel").classList.contains("hidden")) renderFx();
+      if (cur && SCREEN === "class"){ var y = window.scrollY; renderFile(cur); window.scrollTo(0, y); }   // draw the math that was waiting
+    };
     sc.onerror = function(){ katexState = 0; };
     document.head.appendChild(sc);
   }
@@ -2589,6 +2827,18 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     importFiles(e.dataTransfer.files);
   });
 
+  el("frameMain").addEventListener("click", function(e){
+    var b = e.target.closest("[data-step], [data-ref], [data-goto]");
+    if (!b) return;
+    if (b.hasAttribute("data-step")) setStepper(b.closest(".stepper"), b.getAttribute("data-step"));
+    else if (b.hasAttribute("data-ref")) peek(b);
+    else goLine(+b.getAttribute("data-goto").slice(1), true);
+  });
+  el("frameMain").addEventListener("change", function(e){   // a checklist tick is remembered
+    var t = e.target, cl = t.closest && t.closest("[data-cl]");
+    if (!cl || !t.hasAttribute("data-tick")) return;
+    prog(cur)["c" + cl.getAttribute("data-cl") + ":" + t.getAttribute("data-tick")] = t.checked; saveProg();
+  });
   el("rail").addEventListener("click", function(e){
     var a = e.target.closest("a[data-line]");
     if (!a) return;

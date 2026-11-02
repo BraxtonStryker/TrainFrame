@@ -1,4 +1,4 @@
-# The frame language (v0.2 draft)
+# The frame language (v0.3 draft)
 
 A **frame file** is a plain-text `.frame` file that TrainFrame turns into an interactive walkthrough: problems revealed one step at a time, formula tags that open the formula in place, and plots with sliders. You write content only. The layout, the interactivity and the look come from the app.
 
@@ -33,7 +33,7 @@ group: PDF & CDF
 $$ \int f_X(x)\,dx = 1 $$
 ```
 
-- After `@formula` comes its ID in braces (`{F1}`), then its title. The braces keep the ID apart from the title, and they match the `{{F1}}` that refers to it.
+- After `@formula` comes its ID in braces (`{F1}`), then its title. The braces are required. They keep the ID apart from the title, and they match the `{{F1}}` that refers to it.
 - `$...$` is inline math and `$$...$$` is display math, both written in LaTeX.
 
 ### 3. A problem
@@ -95,7 +95,7 @@ A line starting with `//` is a comment.
 
 ## 1. The rules
 
-1. **A block starts with `@type`** at the very start of a line. What follows on that line is the block's ID in braces and/or its title: `@formula {F1} Valid PDF` (see the table in §3). An ID written without braces (`@formula F1 Valid PDF`) also works, as the first word.
+1. **A block starts with `@type`** at the very start of a line. What follows on that line is the block's ID in braces and/or its title: `@formula {F1} Valid PDF` (see the table in §3). The braces are required on `@frame`, `@formula`, `@definition`, `@problem` and `@part`, and only braces right after the block type hold the ID: in `@formula {F2} PDF of $f_{X}$`, the `{X}` is part of the title. A header without them (`@formula Valid PDF`) is an error, and the load report suggests the fix.
 2. **Properties** are `key: value` lines directly under the header. Keys are lowercase and only the ones that block knows count. The first line that isn't one of them, or a blank line, starts the body.
 3. **The body** runs until the next `@` line. It is text (§2), except in visuals, whose lines are instructions (§6).
 4. **`let`** and **`check:`** lines work anywhere in the blocks that allow them.
@@ -295,7 +295,7 @@ output "Φ(z)" = 1 - Q(z) : 4
 
 When a file is dropped in, TrainFrame lists problems with their line numbers. A **Copy report for AI** button copies the list in a form you can paste straight back to the AI that wrote the file.
 
-**Errors** (the block or line is left out until fixed): an unknown block type ("did you mean `@formula`?"), a ref to an ID that doesn't exist, a duplicate ID, an expression that doesn't parse, a variable or function that isn't defined, a failed `check:`, an unknown visual line or option (often a `,` where a `;` belongs), unclosed `$` or `$$`, LaTeX that KaTeX can't render, and a `@step` outside any problem.
+**Errors** (the block or line is left out until fixed): an unknown block type ("did you mean `@formula`?"), a `@frame`, `@formula`, `@definition`, `@problem` or `@part` without its `{ID}` ("did you mean `@formula {F1} Valid PDF`?"), a ref to an ID that doesn't exist, a duplicate ID, an expression that doesn't parse, a variable or function that isn't defined, a failed `check:`, an unknown visual line or option (often a `,` where a `;` belongs), unclosed `$` or `$$`, LaTeX that KaTeX can't render, and a `@step` outside any problem.
 
 **Warnings** (shown, but the file still works): a formula no step uses, a part with no `@answer`, an unknown property, a numeric answer with no `check:`, and a missing `title`.
 
@@ -325,5 +325,6 @@ To ask for a new word, describe what it should show and write a sample block the
 
 | Version | Changes |
 |---|---|
+| 0.3 | The `{ID}` braces are required on `@frame`, `@formula`, `@definition`, `@problem` and `@part`; a bare ID is an error. This changed before any file was published, so the additions-only promise in §9 starts with this version. |
 | 0.2 | Semicolons separate the parts of visual lines (`y: 0 to 1.5; ticks 0, 0.5, 1; label "..."`), and `for ...` became an option. IDs on header lines go in braces (`@formula {F1} Valid PDF`); bare IDs still work. Added `folder` on `@frame`. The extension is `.frame` only. |
 | 0.1 | First draft |

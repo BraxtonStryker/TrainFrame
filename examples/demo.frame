@@ -8,7 +8,7 @@ folder: Examples
 subtitle: Invented problems · not from any course
 fact: Problems = 2
 fact: Points = 10
-fact: Language = v0.2
+fact: Language = v0.3
 steps: per part
 Each part opens on its first step. Try the next move on paper, then reveal the step to check it. Tags like F2 open the formula a step uses, right where you are.
 

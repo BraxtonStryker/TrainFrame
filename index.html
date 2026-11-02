@@ -170,8 +170,8 @@
   .xtab-x:hover{color:var(--ink); background:color-mix(in srgb, var(--ink) 10%, transparent)}
   .xtab-new{background:none; border:1px dashed var(--line); color:var(--muted); font-size:calc(16px * var(--fs)); line-height:1; width:30px; height:30px; border-radius:8px; flex-shrink:0}
   .xtab-new:hover{color:var(--accent); border-color:var(--accent)}
-  .chead{position:sticky; top:var(--bar, 0px); z-index:20; background:var(--surface)}   /* a class's file tabs and sections stay reachable without scrolling */
-  .fstrip{border-bottom:1px solid var(--line)}
+  .chead{position:sticky; top:calc(var(--bar, 0px) + var(--strip, 0px)); z-index:20; background:var(--surface)}   /* a class's file tabs and sections stay reachable without scrolling */
+  .fstrip{position:sticky; top:var(--bar, 0px); z-index:30; background:var(--surface); border-bottom:1px solid var(--line)}
   .fstrip .xtabbar{max-width:var(--cw); margin:0 auto; padding:7px 20px}
 
   /* ---------- Library home (every class), and a class: section tabs, then the open section ---------- */
@@ -216,6 +216,8 @@
   .fcard .open{background:none; border:none; padding:0; text-align:left; color:var(--ink); font-size:calc(17px * var(--fs)); font-weight:700; letter-spacing:-.01em; line-height:1.3}
   .fcard .open:hover{color:var(--accent)}
   .fcard .meta{font-size:calc(13px * var(--fs)); color:var(--muted)}
+  .lstat{font-size:calc(12.5px * var(--fs)); font-weight:650}
+  .lstat.good{color:var(--good)} .lstat.warn{color:var(--warn)} .lstat.bad{color:var(--bad)}
   .fcard .acts{display:flex; flex-wrap:wrap; gap:2px 12px; margin-top:6px; border-top:1px solid var(--line); padding-top:4px}
   .fcard .acts button{font-size:calc(13px * var(--fs)); text-decoration:none; padding:4px 0}
   .fcard .acts .danger{color:var(--bad)}
@@ -238,6 +240,7 @@
   .report li.same{border-left-color:var(--line-2)}
   .report li span{flex:1; min-width:0}
   .report li .linkbtn{padding:0}
+  .report li.warn{border-left-color:var(--warn)}
   .dropcover{position:fixed; inset:0; z-index:80; display:grid; place-items:center; background:color-mix(in srgb, var(--accent) 16%, var(--overlay)); pointer-events:none}
   .dropcover div{background:var(--surface); color:var(--ink); border:2px dashed var(--accent); border-radius:var(--radius); padding:28px 36px; font-size:calc(18px * var(--fs)); font-weight:700; box-shadow:var(--shadow-pop)}
 
@@ -279,6 +282,16 @@
   .fact{border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:3px 12px; font-size:calc(13.5px * var(--fs))}
   .fact b{color:var(--muted); font-weight:600; margin-right:6px}
   .intro p{margin:14px 0 0; max-width:72ch}
+  .lrep{margin:20px 0 0; padding:12px 16px; border-left:4px solid var(--good); font-family:var(--font-body)}
+  .lrep.warn{border-left-color:var(--warn)} .lrep.bad{border-left-color:var(--bad)}
+  .lrep-h{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:calc(14.5px * var(--fs))}
+  .lrep-h .sp{flex:1}
+  .lrep ul{list-style:none; margin:10px 0 0; padding:0; max-height:320px; overflow:auto}
+  .lrep li{display:flex; gap:10px; align-items:baseline; padding:5px 0; border-top:1px solid var(--line); font-size:calc(14px * var(--fs))}
+  .lrep li .ln{flex:none; background:none; border:none; padding:0; font-family:var(--font-mono); font-size:calc(12.5px * var(--fs)); font-weight:700; text-decoration:underline; text-underline-offset:3px}
+  .lrep li.e .ln{color:var(--bad)} .lrep li.w .ln{color:var(--warn)}
+  .src .l.le{box-shadow:inset 3px 0 0 var(--bad); background:color-mix(in srgb, var(--bad) 7%, transparent)}
+  .src .l.lw{box-shadow:inset 3px 0 0 var(--warn)}
   .pending{border-left:4px solid var(--accent); background:var(--accent-soft); padding:12px 16px; border-radius:var(--radius-sm); margin:22px 0 16px; font-family:var(--font-body); font-size:calc(14.5px * var(--fs))}
   .pending p{margin:0}
   .src{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:10px 0; font-family:var(--font-mono); font-size:calc(13px * var(--fs)); line-height:1.6; overflow-x:auto}
@@ -313,7 +326,15 @@
   .notetab{writing-mode:vertical-rl; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-right:none;
     font-size:calc(13px * var(--fs)); font-weight:600; letter-spacing:.04em; padding:16px 7px; border-radius:10px 0 0 10px; box-shadow:var(--shadow)}
   .notetab:hover{background:var(--surface-2)}
-  .notetab[aria-expanded="true"]{color:var(--accent); background:var(--accent-soft)}
+  .notetab[aria-expanded="true"], .notetab[aria-pressed="true"]{color:var(--accent); background:var(--accent-soft)}
+  .docktabs{display:flex; flex-direction:column; gap:8px}
+  .fxlist{overflow:auto; display:flex; flex-direction:column; gap:10px}
+  .fxcard{border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px; background:var(--surface-2)}
+  .fxcard h4{margin:0 0 6px; font-size:calc(14px * var(--fs))}
+  .fxcard h4 span{font-family:var(--font-mono); color:var(--accent); margin-right:8px}
+  .fxcard .fxb{font-size:calc(14px * var(--fs)); overflow-x:auto}
+  .fxcard .fxb p{margin:4px 0}
+  .fxcard math[display="block"]{margin:6px 0}
   .notepanel{width:340px; max-width:calc(100vw - 48px); max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:10px;
     padding:14px; border-radius:var(--radius) 0 0 var(--radius); border-right:none}
   .notehead{display:flex; align-items:center; gap:8px}
@@ -454,9 +475,6 @@
       <div class="xtabbar"><div class="xtabs" id="clsTabs" role="tablist" aria-label="Open classes"></div><button class="xtab-new" id="clsNew" type="button" title="Open another class from the Library" aria-label="Open another class from the Library">+</button></div>
       <span class="push" aria-hidden="true"></span>
       <button class="tab" type="button" data-tab="help">Help</button>
-      <button class="tab icon" type="button" id="calcBtn" aria-pressed="false" aria-controls="calcWin" aria-label="Calculator" title="Calculator">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15v3M8 18h.01M12 18h.01"/></svg>
-      </button>
       <button class="tab icon" type="button" data-tab="settings" aria-label="Settings" title="Settings">
         <!-- gear icon after Feather Icons (MIT) -->
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -464,6 +482,7 @@
     </nav>
   </div>
 </header>
+<div class="fstrip hidden" id="fstrip"><div class="xtabbar"><div class="xtabs" id="fileTabs" role="tablist" aria-label="Open files"></div></div></div>
 <div class="banner hidden" id="storageBanner"></div>
 
 <!-- ====== LIBRARY HOME: every class, then adding files ====== -->
@@ -492,8 +511,7 @@
 <!-- ====== A CLASS: its open files, its sections, then a section or a file ====== -->
 <section id="classScreen" class="hidden">
   <div class="chead" id="chead">
-  <div class="fstrip hidden" id="fstrip"><div class="xtabbar"><div class="xtabs" id="fileTabs" role="tablist" aria-label="Open files"></div></div></div>
-  <div class="libhead">
+  <div class="libhead" id="libhead">
     <div class="libhead-in">
       <nav class="stabs" id="secTabs" role="tablist" aria-label="Sections">
         <button class="stab" role="tab" type="button" data-sec="assignments" aria-selected="true">Assignments</button>
@@ -530,7 +548,7 @@
     <h2>Classes and tabs</h2>
     <ul>
       <li><b>Library</b> lists every class. Click one and it opens as a tab next to Library. Close a tab with its &times; (or a middle click); the class stays in the Library.</li>
-      <li>Each class tab remembers its section and folder. The files you open in a class get their own tabs above its sections, and each one remembers where you scrolled.</li>
+      <li>Each class tab remembers its section and folder. The files you open get tabs in a row under the top bar, and each one remembers where you scrolled.</li>
       <li><b>Edit class</b> renames, archives or deletes a class. Renaming only changes TrainFrame: files whose <code>class:</code> line has the old name keep landing in the renamed class. Archived classes move to the bottom of the Library.</li>
     </ul>
     <h2>Your files</h2>
@@ -543,7 +561,9 @@
     <ul>
       <li><b>Problem rail</b> on the left: jump to the formulas or to any problem. The one you're reading is highlighted.</li>
       <li><b>Notes</b> on the right edge: one box per file, saved as you type. <b>Insert heading</b> adds the problem you're on, and <b>Export</b> saves the notes as a Markdown file.</li>
-      <li><b>Calculator</b> in the top bar: a window you can drag anywhere, on every screen.</li>
+      <li><b>Formulas</b> on the right edge: the file’s formula bank, next to your notes.</li>
+      <li><b>Calc</b> on the right edge: a calculator window you can drag anywhere, on every screen.</li>
+      <li><b>Load report</b> under the title: anything wrong in the file, with line numbers. <b>Copy report for AI</b> copies it so you can paste it back to whatever wrote the file.</li>
     </ul>
     <h2>Writing a file</h2>
     <p>A frame file is a list of blocks, each starting with an <code>@</code> line:</p>
@@ -560,6 +580,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     <p>The full language is in <code>docs/LANGUAGE.md</code> in the TrainFrame repository. It will be built into this page, with a <b>Copy AI prompt</b> button, in a later version.</p>
     <h2>What's new</h2>
     <dl class="versions">
+      <dt>0.2.0 (2026-11-02)</dt>
+      <dd>Files are checked when they load. Every <code>check:</code> line is worked out, and a load report on the file lists errors and warnings with their line numbers. Click one to jump to it, or use <b>Copy report for AI</b> to send it back to whatever wrote the file. File cards and the Add files report show the result too. Open files share one row of tabs, and the formula bank and the calculator sit on the right edge with your notes.</dd>
       <dt>0.1.0 (2026-11-02)</dt>
       <dd>The working shell: the Library of classes, class and file tabs that remember where you were, folders, a class editor (rename, archive, delete), adding files, the problem rail, the notes box and the calculator window. A file opens as its source until the renderer is built. The calculator's keys come in a later version.</dd>
     </dl>
@@ -578,7 +600,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 </section>
 
 <!-- ====== NOTES (an open file only) ====== -->
-<div id="noteDock" class="hidden">
+<div id="noteDock">
   <aside class="card notepanel hidden" id="notePanel" aria-label="Notes">
     <div class="notehead">
       <b id="noteTitle">Notes</b>
@@ -591,7 +613,18 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     <textarea id="noteText" placeholder="Notes for this file, saved as you type."></textarea>
     <div class="notefoot muted" id="noteStatus"></div>
   </aside>
-  <button class="notetab" id="noteToggle" type="button" aria-expanded="false" aria-controls="notePanel">NOTES</button>
+  <aside class="card notepanel hidden" id="fxPanel" aria-label="Formula bank">
+    <div class="notehead">
+      <b id="fxTitle">Formulas</b>
+      <button class="notex" id="fxClose" type="button" aria-label="Close the formula bank">&times;</button>
+    </div>
+    <div class="fxlist" id="fxList"></div>
+  </aside>
+  <div class="docktabs">
+    <button class="notetab hidden" id="noteToggle" type="button" aria-expanded="false" aria-controls="notePanel">NOTES</button>
+    <button class="notetab hidden" id="fxToggle" type="button" aria-expanded="false" aria-controls="fxPanel">FORMULAS</button>
+    <button class="notetab" id="calcBtn" type="button" aria-pressed="false" aria-controls="calcWin">CALC</button>
+  </div>
 </div>
 
 <!-- ====== CALCULATOR (every screen) ====== -->
@@ -661,7 +694,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 (function(){
   "use strict";
 
-  var APP_VERSION = "0.1.0";
+  var APP_VERSION = "0.2.0";
   var NS = "trainFrame:";   // every GitHub Pages project of this user shares one origin, so namespace every key
   var UNSORTED = "Unsorted";   // the class tab for files with no class: line
   var el = function(id){ return document.getElementById(id); };
@@ -752,7 +785,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 
   var store = null;
   var FILES = {};    // frame id -> file record (see "files" above)
-  var INFO = {};     // frame id -> readFrame() of its text
+  var INFO = {};     // frame id -> parseFrame() of its text
   var NOTES = {};    // frame id -> notes record
   var PLACES = {};   // place id -> place record
   var CLASSES = {};  // class name -> class record (only classes that were renamed or archived)
@@ -800,45 +833,737 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     });
   }
 
-  /* ---------- Reading a file's header, problems and formulas. A stand-in until the full parser (plan step 3) ---------- */
-  var FRAME_PROPS = { title: 1, "class": 1, folder: 1, subtitle: 1, fact: 1, kind: 1, steps: 1 };
-  function readFrame(text){
+  /* ---------- Frame language: expressions. TrainFrame's own parser and evaluator, so a frame file can never run code ---------- */
+  // Values are numbers, or { re, im } for complex numbers. Syntax trees: num, var, neg, bin (+ - * / % ^), cmp (chained),
+  // and, or, not, call, and bind (sum, product, integral). Lets are { name, params, body, line }; they see the variables of
+  // the place they're used from (a slider's value, a sum's index), which is how a plot's let can use the plot's sliders.
+  var LANGUAGE_VERSION = "0.3";
+  function dict(o){ var d = Object.create(null); if (o) Object.keys(o).forEach(function(k){ d[k] = o[k]; }); return d; }
+  var KEYWORDS = dict({ and: 1, or: 1, not: 1, to: 1, step: 1, "in": 1 });
+  var BINDERS = dict({ sum: 1, product: 1, integral: 1 });
+  var CONSTS = dict({ pi: Math.PI, e: Math.E, j: { re: 0, im: 1 }, deg: Math.PI / 180, inf: Infinity });
+  function tokenize(src){
+    var out = [], re = /\s*(?:(\d+(?:\.\d*)?(?:[eE][+-]?\d+)?|\.\d+(?:[eE][+-]?\d+)?)|([A-Za-z_]\w*)|(<=|>=|==|!=|[-+*\/^%(),<>=]))/y;
+    while (re.lastIndex < src.length){
+      var at = re.lastIndex;
+      if (!src.slice(at).trim()) break;
+      var m = re.exec(src);
+      if (!m){ re.lastIndex = at; throw new Error("can’t read “" + src.slice(at).trim().slice(0, 12) + "”"); }
+      if (m[1] != null) out.push({ k: "num", v: parseFloat(m[1]) });
+      else if (m[2] != null) out.push({ k: "name", v: m[2] });
+      else out.push({ k: "op", v: m[3] });
+    }
+    return out;
+  }
+  function parseExpr(src){
+    var t = tokenize(String(src)), i = 0;
+    if (!t.length) throw new Error("the expression is empty");
+    var shown = function(x){ return x ? "“" + x.v + "”" : "the end"; };
+    var isOp = function(v){ return t[i] && t[i].k === "op" && t[i].v === v; };
+    var isWord = function(v){ return t[i] && t[i].k === "name" && t[i].v === v; };
+    var want = function(v){ if (!isOp(v)) throw new Error("expected “" + v + "” but found " + shown(t[i])); i++; };
+    var startsValue = function(){ return t[i] && ((t[i].k === "name" && !KEYWORDS[t[i].v]) || isOp("(")); };
+    function orx(){ var a = andx(); while (isWord("or")){ i++; a = { t: "or", a: a, b: andx() }; } return a; }
+    function andx(){ var a = notx(); while (isWord("and")){ i++; a = { t: "and", a: a, b: notx() }; } return a; }
+    function notx(){ if (isWord("not")){ i++; return { t: "not", a: notx() }; } return cmp(); }
+    function cmp(){
+      var a = add(), ops = [], args = [a];
+      while (t[i] && t[i].k === "op" && /^(<|<=|>|>=|==|!=)$/.test(t[i].v)){ ops.push(t[i++].v); args.push(add()); }
+      return ops.length ? { t: "cmp", ops: ops, args: args } : a;
+    }
+    function add(){ var a = mul(); while (isOp("+") || isOp("-")){ var o = t[i++].v; a = { t: "bin", op: o, a: a, b: mul() }; } return a; }
+    function mul(){ var a = unary(); while (isOp("*") || isOp("/") || isOp("%")){ var o = t[i++].v; a = { t: "bin", op: o, a: a, b: unary() }; } return a; }
+    function unary(){ if (isOp("-")){ i++; return { t: "neg", a: unary() }; } if (isOp("+")){ i++; return unary(); } return pow(); }
+    function pow(){ var a = primary(); if (isOp("^")){ i++; return { t: "bin", op: "^", a: a, b: unary() }; } return a; }   // right to left; -x^2 is -(x^2)
+    function primary(){
+      var x = t[i];
+      if (!x) throw new Error("the expression ends too soon");
+      if (x.k === "num"){
+        i++;
+        var n = { t: "num", v: x.v };
+        return startsValue() ? { t: "bin", op: "*", a: n, b: pow() } : n;   // a plain number may touch what follows: 2x, 3pi, 4(x+1)
+      }
+      if (isOp("(")){ i++; var e = orx(); want(")"); return e; }
+      if (x.k === "name"){
+        if (KEYWORDS[x.v]) throw new Error("“" + x.v + "” can’t start a value here");
+        i++;
+        if (!isOp("(")) return { t: "var", n: x.v };
+        i++;
+        if (BINDERS[x.v]) return binder(x.v);
+        var args = [];
+        if (!isOp(")")){ do { args.push(orx()); } while (isOp(",") && ++i); }
+        want(")");
+        return { t: "call", n: x.v, args: args };
+      }
+      throw new Error("unexpected “" + x.v + "”");
+    }
+    function binder(kind){   // sum(n = 1 to N [step s], body), product(...), integral(x = a to b, body)
+      if (!t[i] || t[i].k !== "name") throw new Error(kind + "() starts with a variable, like " + kind + "(n = 1 to 10, ...)");
+      var v = t[i++].v;
+      want("=");
+      var lo = add();
+      if (!isWord("to")) throw new Error(kind + "() needs “to”, like " + kind + "(" + v + " = 1 to 10, ...)");
+      i++;
+      var hi = add(), st = null;
+      if (isWord("step")){ if (kind === "integral") throw new Error("integral() doesn’t take a step"); i++; st = add(); }
+      want(",");
+      var body = orx();
+      want(")");
+      return { t: "bind", kind: kind, v: v, lo: lo, hi: hi, st: st, body: body };
+    }
+    var e = orx();
+    if (i < t.length) throw new Error("unexpected " + shown(t[i]));
+    return e;
+  }
+
+  // complex arithmetic: a value is a number, or { re, im } once it has an imaginary part
+  function isC(v){ return v !== null && typeof v === "object"; }
+  function reOf(v){ return isC(v) ? v.re : v; }
+  function imOf(v){ return isC(v) ? v.im : 0; }
+  function fix(v){ return isC(v) && Math.abs(v.im) <= 1e-12 * Math.max(1, Math.abs(v.re)) ? v.re : v; }
+  function cx(re, im){ return fix({ re: re, im: im }); }
+  function cadd(a, b){ return isC(a) || isC(b) ? cx(reOf(a) + reOf(b), imOf(a) + imOf(b)) : a + b; }
+  function csub(a, b){ return isC(a) || isC(b) ? cx(reOf(a) - reOf(b), imOf(a) - imOf(b)) : a - b; }
+  function cmul(a, b){
+    if (!isC(a) && !isC(b)) return a * b;
+    var ar = reOf(a), ai = imOf(a), br = reOf(b), bi = imOf(b);
+    return cx(ar * br - ai * bi, ar * bi + ai * br);
+  }
+  function cdiv(a, b){
+    if (!isC(a) && !isC(b)) return a / b;
+    var ar = reOf(a), ai = imOf(a), br = reOf(b), bi = imOf(b), d = br * br + bi * bi;
+    return cx((ar * br + ai * bi) / d, (ai * br - ar * bi) / d);
+  }
+  function cabs(v){ return isC(v) ? Math.hypot(v.re, v.im) : Math.abs(v); }
+  function carg(v){ return Math.atan2(imOf(v), reOf(v)); }
+  function cexp(v){ if (!isC(v)) return Math.exp(v); var m = Math.exp(v.re); return cx(m * Math.cos(v.im), m * Math.sin(v.im)); }
+  function cln(v){ return !isC(v) && v >= 0 ? Math.log(v) : cx(Math.log(cabs(v)), carg(v)); }
+  function csqrt(v){
+    if (!isC(v)) return v >= 0 ? Math.sqrt(v) : cx(0, Math.sqrt(-v));
+    var r = cabs(v), re = Math.sqrt((r + v.re) / 2), im = Math.sqrt((r - v.re) / 2);
+    return cx(re, v.im < 0 ? -im : im);
+  }
+  function cpow(a, b){
+    if (!isC(a) && !isC(b) && (a >= 0 || b === Math.round(b))) return Math.pow(a, b);
+    if (cabs(a) === 0) return 0;
+    return cexp(cmul(b, cln(a)));
+  }
+  function csin(v){ return isC(v) ? cx(Math.sin(v.re) * Math.cosh(v.im), Math.cos(v.re) * Math.sinh(v.im)) : Math.sin(v); }
+  function ccos(v){ return isC(v) ? cx(Math.cos(v.re) * Math.cosh(v.im), -Math.sin(v.re) * Math.sinh(v.im)) : Math.cos(v); }
+  function realOf(v, what){
+    v = fix(v);
+    if (isC(v)) throw new Error(what + " needs a real number, not a complex one");
+    return v;
+  }
+  function erfc(x){   // Numerical Recipes' erfcc: fractional error below 1.2e-7 everywhere
+    var z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+    var r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 +
+      t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? r : 2 - r;
+  }
+  function qfun(z){ return 0.5 * erfc(z / Math.SQRT2); }
+  function qinv(p){
+    if (!(p > 0 && p < 1)) throw new Error("Qinv() needs a probability between 0 and 1");
+    var lo = -40, hi = 40;
+    for (var k = 0; k < 200; k++){ var m = (lo + hi) / 2; if (qfun(m) > p) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+  function factorial(n){
+    if (n !== Math.round(n) || n < 0) throw new Error("fact() needs a whole number 0 or more");
+    if (n > 170) return Infinity;
+    var r = 1; for (var k = 2; k <= n; k++) r *= k; return r;
+  }
+  // built-in functions: [fewest values, most values, function]; R() makes one that takes only real numbers
+  function R(name, f){ return function(){ var a = Array.prototype.map.call(arguments, function(v){ return realOf(v, name + "()"); }); return f.apply(null, a); }; }
+  var FN = dict({
+    sin: [1, 1, csin], cos: [1, 1, ccos], tan: [1, 1, function(v){ return cdiv(csin(v), ccos(v)); }],
+    asin: [1, 1, R("asin", Math.asin)], acos: [1, 1, R("acos", Math.acos)], atan: [1, 1, R("atan", Math.atan)], atan2: [2, 2, R("atan2", Math.atan2)],
+    sinh: [1, 1, R("sinh", Math.sinh)], cosh: [1, 1, R("cosh", Math.cosh)], tanh: [1, 1, R("tanh", Math.tanh)],
+    exp: [1, 1, cexp], ln: [1, 1, cln], log10: [1, 1, R("log10", Math.log10)], log2: [1, 1, R("log2", Math.log2)], sqrt: [1, 1, csqrt],
+    abs: [1, 1, cabs], sign: [1, 1, R("sign", Math.sign)], floor: [1, 1, R("floor", Math.floor)], ceil: [1, 1, R("ceil", Math.ceil)], round: [1, 1, R("round", Math.round)],
+    min: [1, 99, R("min", Math.min)], max: [1, 99, R("max", Math.max)],
+    clamp: [3, 3, R("clamp", function(x, lo, hi){ return Math.min(Math.max(x, lo), hi); })],
+    mod: [2, 2, R("mod", function(a, b){ return ((a % b) + b) % b; })],
+    fact: [1, 1, R("fact", factorial)], choose: [2, 2, R("choose", function(n, k){ return factorial(n) / (factorial(k) * factorial(n - k)); })],
+    gauss: [3, 3, R("gauss", function(x, mu, s){ return Math.exp(-(x - mu) * (x - mu) / (2 * s * s)) / (s * Math.sqrt(2 * Math.PI)); })],
+    Phi: [1, 1, R("Phi", function(z){ return 1 - qfun(z); })], Q: [1, 1, R("Q", qfun)], Qinv: [1, 1, R("Qinv", qinv)],
+    erf: [1, 1, R("erf", function(x){ return 1 - erfc(x); })], erfc: [1, 1, R("erfc", erfc)],
+    re: [1, 1, reOf], im: [1, 1, imOf], arg: [1, 1, carg], conj: [1, 1, function(v){ return cx(reOf(v), -imOf(v)); }],
+    cis: [1, 1, function(v){ return cexp(cmul({ re: 0, im: 1 }, v)); }]
+  });
+  function truthy(v, what){ return realOf(v, what || "a condition") !== 0; }
+  function compare(op, a, b){
+    a = realOf(a, "“" + op + "”"); b = realOf(b, "“" + op + "”");
+    switch (op){
+      case "<": return a < b; case "<=": return a <= b; case ">": return a > b; case ">=": return a >= b;
+      case "==": return Math.abs(a - b) <= 1e-12 * Math.max(1, Math.abs(a), Math.abs(b));
+      default: return Math.abs(a - b) > 1e-12 * Math.max(1, Math.abs(a), Math.abs(b));
+    }
+  }
+  // env: { v: variables (prototype chain, Object.create(null) at the root), L: lets by name, d: let depth }
+  function ev(n, env){
+    switch (n.t){
+      case "num": return n.v;
+      case "var":
+        if (n.n in env.v) return env.v[n.n];
+        if (n.n in env.L){ var L0 = env.L[n.n]; if (!L0.params.length) return callLet(L0, [], env); throw new Error(n.n + " needs values in parentheses, like " + n.n + "(x)"); }
+        if (n.n in CONSTS) return CONSTS[n.n];
+        throw new Error("“" + n.n + "” isn’t defined");
+      case "neg": return cmul(-1, ev(n.a, env));
+      case "bin":
+        var a = ev(n.a, env), b = ev(n.b, env);
+        switch (n.op){
+          case "+": return cadd(a, b); case "-": return csub(a, b); case "*": return cmul(a, b); case "/": return cdiv(a, b);
+          case "%": a = realOf(a, "%"); b = realOf(b, "%"); return ((a % b) + b) % b;
+          default: return cpow(a, b);
+        }
+      case "cmp":
+        var left = ev(n.args[0], env);
+        for (var k = 0; k < n.ops.length; k++){ var right = ev(n.args[k + 1], env); if (!compare(n.ops[k], left, right)) return 0; left = right; }
+        return 1;
+      case "and": return truthy(ev(n.a, env), "and") && truthy(ev(n.b, env), "and") ? 1 : 0;
+      case "or": return truthy(ev(n.a, env), "or") || truthy(ev(n.b, env), "or") ? 1 : 0;
+      case "not": return truthy(ev(n.a, env), "not") ? 0 : 1;
+      case "call":
+        if (n.n === "if"){   // if(c1, a, c2, b, ..., otherwise): only the chosen branch is worked out
+          if (n.args.length < 2) throw new Error("if() needs a condition and a value");
+          for (var q = 0; q + 1 < n.args.length; q += 2) if (truthy(ev(n.args[q], env), "if()")) return ev(n.args[q + 1], env);
+          return n.args.length % 2 ? ev(n.args[n.args.length - 1], env) : NaN;
+        }
+        var vals = n.args.map(function(x){ return ev(x, env); });
+        if (n.n in env.L) return callLet(env.L[n.n], vals, env);
+        if (n.n in FN){
+          var f = FN[n.n];
+          if (vals.length < f[0] || vals.length > f[1]) throw new Error(n.n + "() takes " + (f[0] === f[1] ? plural(f[0], "value") : "at least " + f[0] + " values") + ", not " + vals.length);
+          return fix(f[2].apply(null, vals));
+        }
+        throw new Error("there’s no function called “" + n.n + "”");
+      case "bind":
+        var lo = realOf(ev(n.lo, env), n.kind + "()"), hi = realOf(ev(n.hi, env), n.kind + "()");
+        var at = function(x){ var v = Object.create(env.v); v[n.v] = x; return ev(n.body, { v: v, L: env.L, d: env.d }); };
+        if (n.kind === "integral") return integrate(at, lo, hi);
+        var st = n.st ? realOf(ev(n.st, env), "step") : 1;
+        if (!(st > 0)) throw new Error("a step has to be more than 0");
+        var count = Math.floor((hi - lo) / st + 1e-9) + 1;
+        if (count > 1e6) throw new Error(n.kind + "() would have more than a million terms");
+        var acc = n.kind === "sum" ? 0 : 1;
+        for (var c = 0; c < count; c++){ var term = at(lo + c * st); acc = n.kind === "sum" ? cadd(acc, term) : cmul(acc, term); }
+        return fix(acc);
+    }
+    throw new Error("unknown expression");
+  }
+  function callLet(L, args, env){
+    if (args.length !== L.params.length) throw new Error(L.name + (L.params.length ? "() takes " + plural(L.params.length, "value") + ", not " + args.length : " isn’t a function"));
+    if (env.d > 60) throw new Error("“" + L.name + "” uses itself, so it never finishes");
+    var v = Object.create(env.v);
+    L.params.forEach(function(p, k){ v[p] = args[k]; });
+    return ev(L.body, { v: v, L: env.L, d: env.d + 1 });
+  }
+  function integrate(f, a, b){   // adaptive Simpson on 16 starting panels, so jumps (square waves, piecewise densities) come out right
+    if (a === b) return 0;
+    if (!isFinite(a) || !isFinite(b)) throw new Error("integral() needs finite limits");
+    var sign = 1, calls = 0;
+    if (b < a){ var tmp = a; a = b; b = tmp; sign = -1; }
+    var V = function(x){
+      var v = f(x), re = reOf(v), im = imOf(v);
+      if (!isFinite(re) || !isFinite(im)) throw new Error("the integrand isn’t a number at " + Number(x.toPrecision(6)));
+      return [re, im];
+    };
+    var simp = function(a, fa, b, fb){ var m = (a + b) / 2, fm = V(m), h = (b - a) / 6; return [m, fm, [h * (fa[0] + 4 * fm[0] + fb[0]), h * (fa[1] + 4 * fm[1] + fb[1])]]; };
+    var rec = function(a, fa, b, fb, m, fm, whole, eps, depth){
+      var L = simp(a, fa, m, fm), Rr = simp(m, fm, b, fb);
+      var sr = L[2][0] + Rr[2][0], si = L[2][1] + Rr[2][1], dr = sr - whole[0], di = si - whole[1];
+      if (depth <= 0 || Math.hypot(dr, di) <= 15 * eps || ++calls > 200000) return [sr + dr / 15, si + di / 15];
+      var l = rec(a, fa, m, fm, L[0], L[1], L[2], eps / 2, depth - 1), r = rec(m, fm, b, fb, Rr[0], Rr[1], Rr[2], eps / 2, depth - 1);
+      return [l[0] + r[0], l[1] + r[1]];
+    };
+    var tr = 0, ti = 0, N = 16, x0 = a, f0 = V(a);
+    for (var k = 1; k <= N; k++){
+      var x1 = a + (b - a) * k / N, f1 = V(x1), s = simp(x0, f0, x1, f1);
+      var r = rec(x0, f0, x1, f1, s[0], s[1], s[2], 1e-10 * Math.max(1, Math.hypot(s[2][0], s[2][1])), 40);
+      tr += r[0]; ti += r[1]; x0 = x1; f0 = f1;
+    }
+    return cx(sign * tr, sign * ti);
+  }
+  function evaluate(node, lets, vars){ var v = Object.create(null); if (vars) Object.keys(vars).forEach(function(k){ v[k] = vars[k]; }); return fix(ev(node, { v: v, L: lets || dict(), d: 0 })); }
+  function names(n, bound, out){   // the variables and functions an expression uses, leaving out a binder's own variable
+    out = out || { vars: dict(), calls: dict() };
+    switch (n.t){
+      case "var": if (!bound[n.n]) out.vars[n.n] = 1; break;
+      case "neg": case "not": names(n.a, bound, out); break;
+      case "bin": case "and": case "or": names(n.a, bound, out); names(n.b, bound, out); break;
+      case "cmp": n.args.forEach(function(x){ names(x, bound, out); }); break;
+      case "call": if (n.n !== "if") out.calls[n.n] = n.args.length; n.args.forEach(function(x){ names(x, bound, out); }); break;
+      case "bind":
+        names(n.lo, bound, out); names(n.hi, bound, out); if (n.st) names(n.st, bound, out);
+        var b2 = Object.create(bound); b2[n.v] = 1; names(n.body, b2, out); break;
+    }
+    return out;
+  }
+  function fmtNum(v, d){   // a value for messages and live values: d decimals (default: up to 6 significant digits)
+    v = fix(v);
+    var one = function(x){ return d == null ? String(Number(x.toPrecision(6))) : x.toFixed(d); };
+    if (!isC(v)) return isFinite(v) ? one(v) : String(v);
+    if (Math.abs(v.re) < 1e-12 * Math.abs(v.im)) v = { re: 0, im: v.im };   // exp(-j*pi/2) shows as 0 - 1j, not 6.1e-17 - 1j
+    return one(v.re) + (v.im < 0 ? " − " : " + ") + one(Math.abs(v.im)) + "j";
+  }
+
+  /* ---------- Frame language: blocks, the checker and the load report (docs/LANGUAGE.md) ---------- */
+  var BLOCK_TYPES = dict({
+    frame: { props: ["title", "class", "folder", "subtitle", "fact", "kind", "steps"], id: true, lets: true },
+    formula: { props: ["group", "style"], id: true, top: true }, definition: { props: ["group", "style"], id: true, top: true },
+    section: { props: [], top: true }, checklist: { props: [], top: true },
+    problem: { props: ["points", "short", "label", "steps"], id: true, top: true, lets: true },
+    given: { props: [], inside: true }, plan: { props: [], inside: true }, part: { props: ["points"], id: true, inside: true },
+    step: { props: ["style"], inside: true, checks: true }, answer: { props: [], inside: true, checks: true }, explain: { props: [], inside: true },
+    note: { props: [], callout: true }, tip: { props: [], callout: true }, warning: { props: [], callout: true },
+    plot: { visual: true }, stem: { visual: true }, phasor: { visual: true }, table: { visual: true }, calc: { visual: true }
+  });
+  var STYLES = dict({ formula: ["wide", "highlight"], definition: ["wide", "highlight"], step: ["key", "aside"] });
+  var ID_RE = /^[A-Za-z0-9_-]+$/;
+  var LET_RE = /^let\s+([A-Za-z_]\w*)\s*(?:\(([^)]*)\))?\s*=\s*(.+)$/;
+  var REF_RE = /\{\{\s*([^{}\s]+)\s*\}\}/g;
+  var LIVE_RE = /\{=\s*([^{}]*?)\s*(?::\s*(\d+)\s*)?\}/g;
+  var VISUAL_TYPES = ["plot", "stem", "phasor", "table", "calc"];
+  var DRAW = ["color", "muted", "dashed", "dotted", "width", "legend", "label", "below"];
+  var LINE_OPTS = dict({ slider: ["step", "start", "label"], toggle: ["label"], axis: ["ticks", "label"], curve: DRAW, shade: ["color", "muted"],
+    mark: DRAW, dot: DRAW.concat(["for"]), stem: DRAW.concat(["for", "filled", "hollow"]), vector: DRAW.concat(["for", "one"]), input: ["start", "step", "min", "max", "label"] });
+  var COMMON_LINES = ["slider", "toggle", "set"];
+  var PANEL_LINES = dict({ plot: ["axis", "curve", "shade", "mark", "dot"], stem: ["axis", "stem", "curve", "mark", "dot"], phasor: ["vector", "radius", "dot"],
+    table: ["rows", "column"], calc: ["input", "output"] });
+  var ALL_LINES = ["slider", "toggle", "set", "let", "view", "panel", "caption:", "readout:", "place:", "layout:", "curve", "shade", "mark", "dot", "stem", "vector", "radius", "rows", "column", "input", "output"];
+  function editDistance(a, b){
+    var prev = [], cur, i, k;
+    for (k = 0; k <= b.length; k++) prev[k] = k;
+    for (i = 1; i <= a.length; i++){
+      cur = [i];
+      for (k = 1; k <= b.length; k++) cur[k] = Math.min(prev[k] + 1, cur[k - 1] + 1, prev[k - 1] + (a[i - 1] === b[k - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+  function closest(word, list){   // "did you mean": the nearest name within two edits
+    var best = null, bd = 3;
+    list.forEach(function(w){ var d = editDistance(word.toLowerCase(), w.toLowerCase()); if (d < bd){ bd = d; best = w; } });
+    return best;
+  }
+  function splitTop(s, sep){   // split on sep outside quotes and brackets
+    var out = [], depth = 0, q = false, cur = "";
+    for (var k = 0; k < s.length; k++){
+      var ch = s.charAt(k);
+      if (ch === '"') q = !q;
+      else if (!q && "([{".indexOf(ch) >= 0) depth++;
+      else if (!q && ")]}".indexOf(ch) >= 0) depth--;
+      if (ch === sep && !q && depth === 0){ out.push(cur.trim()); cur = ""; } else cur += ch;
+    }
+    out.push(cur.trim());
+    return out;
+  }
+  function splitCheck(s){   // a check's "=": the last one that isn't part of <=, >=, == or !=
+    for (var k = s.length - 1; k > 0; k--){
+      if (s.charAt(k) === "=" && "<>=!".indexOf(s.charAt(k - 1)) < 0 && s.charAt(k + 1) !== "=") return [s.slice(0, k).trim(), s.slice(k + 1).trim()];
+    }
+    return null;
+  }
+  function q(s){ return "“" + s + "”"; }
+
+  function parseFrame(text){
     var lines = String(text).replace(/^﻿/, "").replace(/\r\n?/g, "\n").split("\n");
-    var info = { id: "", title: "", cls: "", folder: "", subtitle: "", kind: "", facts: [], intro: [], problems: [], formulas: [], lines: lines };
-    var i = 0;
-    while (i < lines.length && (!lines[i].trim() || /^\s*\/\//.test(lines[i]))) i++;
-    var m = i < lines.length ? /^@frame(?:\s+\{?([^\s{}]+)\}?)?\s*$/.exec(lines[i].replace(/\s+$/, "")) : null;
-    if (!m) return null;
-    info.id = m[1] || "";
-    var inProps = true, para = [];
-    for (i++; i < lines.length && lines[i].charAt(0) !== "@"; i++){
-      var s = lines[i].trim(), pm = /^([a-z]+):\s*(.*)$/.exec(s);
+    var errors = [], warnings = [];
+    var err = function(line, msg){ errors.push({ line: line, msg: msg }); };
+    var warn = function(line, msg){ warnings.push({ line: line, msg: msg }); };
+
+    // 1. Lines into blocks: the @ line, its properties, then its body (a visual's lines are all instructions)
+    var blocks = [], cur = null, inProps = false, early = false;
+    for (var i = 0; i < lines.length; i++){
+      var raw = lines[i], s = raw.trim(), no = i + 1;
       if (s.indexOf("//") === 0) continue;
-      if (inProps && pm && FRAME_PROPS[pm[1]]){
-        var v = pm[2].trim();
-        if (pm[1] === "fact"){ var eq = v.indexOf("="); info.facts.push(eq > 0 ? [v.slice(0, eq).trim(), v.slice(eq + 1).trim()] : ["", v]); }
-        else info[pm[1] === "class" ? "cls" : pm[1]] = v;
+      if (raw.charAt(0) === "@"){
+        var m = /^@([A-Za-z][\w-]*)(?:\s+(.*))?$/.exec(raw.replace(/\s+$/, ""));
+        if (!m){ err(no, "An @ at the start of a line begins a block, like @step. To start a text line with @, write \\@."); if (!cur) early = true; cur = { skip: true }; continue; }
+        var spec = BLOCK_TYPES[m[1]];
+        if (!spec){
+          var guess = closest(m[1], Object.keys(BLOCK_TYPES));
+          err(no, "There’s no block called @" + m[1] + (guess ? ". Did you mean @" + guess + "?" : ".") + " The lines under it are left out.");
+          if (!cur) early = true;
+          cur = { skip: true }; continue;
+        }
+        cur = { type: m[1], spec: spec, line: no, rest: (m[2] || "").trim(), props: dict(), propLine: dict(), facts: [], body: [], lets: [], checks: [], attached: [] };
+        blocks.push(cur); inProps = !spec.visual; continue;
+      }
+      if (!cur){ if (s) early = true; continue; }
+      if (cur.skip) continue;
+      if (cur.spec.visual){ if (s) cur.body.push({ line: no, text: s }); continue; }
+      if (inProps){
+        var pm = /^([a-z]+):\s*(.*)$/.exec(s);
+        if (pm && cur.spec.props.indexOf(pm[1]) >= 0){
+          if (pm[1] === "fact") cur.facts.push({ line: no, text: pm[2].trim() });
+          else {
+            if (pm[1] in cur.props) warn(no, pm[1] + ": is set twice on this @" + cur.type + ". The last one counts.");
+            cur.props[pm[1]] = pm[2].trim(); cur.propLine[pm[1]] = no;
+          }
+          continue;
+        }
+        if (pm && pm[1] !== "check" && pm[1] !== "let"){
+          var near = closest(pm[1], cur.spec.props);
+          if (near) warn(no, q(pm[1] + ":") + " isn’t a property of @" + cur.type + ", so it’s shown as text. Did you mean " + near + ":?");
+        }
+        inProps = false;
+        if (!s) continue;
+      }
+      if (/^let\s/.test(s) && cur.spec.lets){ cur.lets.push({ line: no, text: s }); continue; }
+      if (/^check:/.test(s)){
+        if (cur.spec.checks) cur.checks.push({ line: no, text: s.slice(6).trim() });
+        else err(no, "check: lines go in a @step or an @answer.");
         continue;
       }
-      inProps = false;
-      if (s) para.push(s); else if (para.length){ info.intro.push(para.join(" ")); para = []; }
+      cur.body.push({ line: no, text: /^\s*\\(@|\/\/)/.test(raw) ? raw.replace(/^(\s*)\\/, "$1") : raw });
     }
-    if (para.length) info.intro.push(para.join(" "));
-    for (var j = 0; j < lines.length; j++){
-      var pb = /^@problem\s+\{?([^\s{}]+)\}?\s*(.*)$/.exec(lines[j]);
-      if (pb){
-        var p = { id: pb[1], title: pb[2].trim(), points: "", short: "", label: "", line: j + 1 };
-        for (var k = j + 1; k < lines.length && lines[k].charAt(0) !== "@"; k++){
-          var q = /^\s*(points|short|label):\s*(.*)$/.exec(lines[k]);
-          if (q) p[q[1]] = q[2].trim();
-          else if (lines[k].trim() && !/^\s*(let\s|\/\/)/.test(lines[k])) break;
-        }
-        info.problems.push(p);
+    if (early || !blocks.length || blocks[0].type !== "frame") return null;   // not a frame file at all
+
+    // 2. Structure: IDs, problems and what belongs to them, lets
+    var frame = blocks[0], ids = dict(), problems = [], formulas = [], items = [];
+    var sampleId = function(type){ return type === "part" ? "a" : type === "problem" ? "P1" : type === "frame" ? "my-file" : type === "definition" ? "D1" : "F1"; };
+    var head = function(b){   // "{ID} title": only braces right after the block type hold the ID (braces later, like $f_{X}$, are title text)
+      var hm = /^\{\s*([^{}]*?)\s*\}\s*(.*)$/.exec(b.rest);
+      if (hm){
+        b.id = hm[1]; b.title = hm[2];
+        if (!b.id) err(b.line, "The braces after @" + b.type + " are empty. Put its ID in them, like @" + b.type + " {" + sampleId(b.type) + "}.");
+        else if (!ID_RE.test(b.id)) err(b.line, "The ID " + q(b.id) + " can only use letters, digits, - and _.");
+        return;
       }
-      var fm = /^@(formula|definition)\s+\{?([^\s{}]+)\}?\s*(.*)$/.exec(lines[j]);
-      if (fm) info.formulas.push({ kind: fm[1], id: fm[2], title: fm[3].trim(), line: j + 1 });
+      // No braces is an error. A first word that looks like an ID still works as one, so refs to it don't fail as well.
+      var first = b.rest.split(/\s+/)[0] || "";
+      var looks = b.type === "frame" ? ID_RE.test(first) : b.type === "part" ? /^[A-Za-z0-9]{1,3}$/.test(first) : /^(?=.*\d)[A-Za-z0-9_-]+$/.test(first);
+      b.id = looks ? first : "";
+      b.title = looks ? b.rest.slice(first.length).trim() : b.rest;
+      err(b.line, "@" + b.type + " needs its ID in braces right after it. Did you mean " + q("@" + b.type + " {" + (b.id || sampleId(b.type)) + "}" + (b.title ? " " + b.title : "")) + "?");
+    };
+    var addLets = function(list, into){
+      list.forEach(function(l){
+        var m = LET_RE.exec(l.text);
+        if (!m){ err(l.line, "A let line looks like " + q("let f(x) = ...") + " or " + q("let w0 = ...") + "."); return; }
+        var name = m[1], params = m[2] != null ? m[2].split(",").map(function(p){ return p.trim(); }).filter(Boolean) : [];
+        if (name in FN || name in CONSTS || name in KEYWORDS || name in BINDERS || name === "if"){ err(l.line, q(name) + " is a built-in name, so a let can’t use it. Pick another name."); return; }
+        var badp = params.filter(function(p){ return !/^[A-Za-z_]\w*$/.test(p); })[0];
+        if (badp != null){ err(l.line, "In let " + name + ", " + q(badp) + " isn’t a valid parameter name."); return; }
+        try { into[name] = { name: name, params: params, body: parseExpr(m[3]), line: l.line }; }
+        catch (e){ err(l.line, "In let " + name + ": " + e.message + "."); }
+      });
+    };
+    head(frame);
+    var frameLets = dict();
+    addLets(frame.lets, frameLets);
+    var prob = null, part = null, anchor = frame;
+    for (var b = 1; b < blocks.length; b++){
+      var B = blocks[b], sp2 = B.spec;
+      if (sp2.id) head(B); else B.title = B.rest;
+      if (sp2.top){
+        prob = B.type === "problem" ? B : null; part = null; anchor = B;
+        items.push(B);
+        if (B.type === "formula" || B.type === "definition") formulas.push(B);
+        if (B.type === "problem"){
+          B.items = []; B.parts = []; B.L = dict(frameLets); addLets(B.lets, B.L); problems.push(B);
+        }
+        if (B.id && (B.type === "formula" || B.type === "definition" || B.type === "problem")){
+          if (B.id in ids) err(B.line, "The ID " + B.id + " is already used on line " + ids[B.id].line + ". IDs have to be different across formulas, definitions and problems.");
+          else ids[B.id] = B;
+        }
+      } else if (sp2.inside){
+        anchor = B;
+        if (!prob){ err(B.line, "@" + B.type + " belongs inside a @problem. Add a @problem line above it."); B.orphan = true; continue; }
+        B.problem = prob; prob.items.push(B);
+        if (B.type === "part"){
+          if (B.id && prob.parts.some(function(x){ return x.id === B.id; })) err(B.line, "Problem " + prob.id + " already has a part " + B.id + ".");
+          prob.parts.push(B); part = B;
+        }
+        if (B.type === "answer"){ if (part) part.answered = true; else prob.answered = true; }
+      } else {   // a callout or a visual belongs to the block right above it
+        B.anchor = anchor; B.problem = anchor.problem || (anchor.type === "problem" ? anchor : null);
+        if (anchor.spec.top && anchor.type !== "problem" || anchor === frame) items.push(B); else anchor.attached.push(B);
+      }
     }
-    return info;
+    var letsFor = function(B){ return (B.problem && B.problem.L) || (B.type === "problem" && B.L) || frameLets; };
+
+    // 3. Visuals (each defines its own names: sliders, toggles, set, inputs, its axis variable, table rows)
+    var refs = [], fileVars = dict();
+    blocks.forEach(function(B){ if (B.spec.visual) parseVisual(B, letsFor(B)); });
+    function parseVisual(B, L0){
+      var vis = B.vis = { kind: B.type, title: B.title, place: "", layout: "", lets: dict(), panels: [], views: [] };
+      var L = dict(L0), vars = dict();
+      addLets(B.body.filter(function(x){ return /^let\s/.test(x.text); }), vis.lets);
+      Object.keys(vis.lets).forEach(function(k){ L[k] = vis.lets[k]; });
+      var hasAxis = false;
+      B.body.forEach(function(x){   // first, every name this visual defines
+        var s = x.text, m;
+        if ((m = /^(?:slider|input)\s+([A-Za-z_]\w*)\s*:/.exec(s)) || (m = /^toggle\s+([A-Za-z_]\w*)/.exec(s)) || (m = /^rows\s+([A-Za-z_]\w*)/.exec(s))) vars[m[1]] = 1;
+        else if ((m = /^set\s+(.*)$/.exec(s))) s.slice(4).split(/[,;]/).forEach(function(a){ var am = /^\s*([A-Za-z_]\w*)\s*=/.exec(a); if (am) vars[am[1]] = 1; });
+        else if ((m = /^([A-Za-z_]\w*)\s*:/.exec(s)) && ["caption", "readout", "place", "layout", "y"].indexOf(m[1]) < 0){ vars[m[1]] = 1; hasAxis = true; }
+      });
+      if (!hasAxis && (B.type === "plot" || B.type === "stem")) vars.x = 1;
+      Object.keys(vars).forEach(function(k){ fileVars[k] = 1; });
+      var exprAt = function(src, line, bound, fnOk){   // parse, then make sure every name it uses is defined here
+        var node;
+        try { node = parseExpr(src); } catch (e){ err(line, e.message + " (in " + q(src) + ")."); return null; }
+        if (fnOk && node.t === "var" && node.n in L && L[node.n].params.length === 1 && !(node.n in vars)) return node;   // curve f: a function of the axis variable
+        var nm = names(node, bound || dict());
+        Object.keys(nm.vars).forEach(function(v){
+          if (v in vars || v in CONSTS) return;
+          if (v in L){ if (L[v].params.length) err(line, q(v) + " needs values in parentheses, like " + v + "(x)."); return; }
+          var g = closest(v, Object.keys(vars).concat(Object.keys(L)));
+          err(line, q(v) + " isn’t defined here. Define it with let, a slider, set or input" + (g ? ", or did you mean " + g + "?" : "."));
+        });
+        Object.keys(nm.calls).forEach(function(f){ arity(f, nm.calls[f], L, line); });
+        return node;
+      };
+      var textAt = function(t, line, bound){ checkText([{ line: line, text: t }], { L: L, vars: vars, bound: bound }); };
+      var forVar = function(c, line){   // for t = a to b [step s]  |  for t in a, b, c
+        var m = /^for\s+([A-Za-z_]\w*)\s*(=|in)\s*(.+)$/.exec(c);
+        if (!m){ err(line, "A for clause looks like " + q("for n = -9 to 9") + " or " + q("for t in 0, 1, 2") + "."); return null; }
+        if (m[2] === "=") {
+          var r = /^(.+?)\s+to\s+(.+?)(?:\s+step\s+(.+))?$/.exec(m[3]);
+          if (!r) err(line, "A for range looks like " + q("for " + m[1] + " = 1 to 10") + ".");
+          else [r[1], r[2], r[3]].forEach(function(e){ if (e) exprAt(e, line); });
+        } else splitTop(m[3], ",").forEach(function(e){ exprAt(e, line); });
+        return m[1];
+      };
+      var panel = { kind: B.type, line: B.line, items: [] }, view = null;
+      vis.panels.push(panel);
+      B.body.forEach(function(x){
+        var s = x.text, line = x.line, m;
+        if (/^let\s/.test(s)) return;
+        if ((m = /^(caption|readout):\s*(.*)$/.exec(s))){ textAt(m[2], line); panel.items.push({ line: line, view: view, kw: m[1], text: m[2] }); return; }
+        if ((m = /^place:\s*(.*)$/.exec(s))){ if (m[1] !== "after steps") err(line, "place: can only be " + q("after steps") + "."); vis.place = m[1]; return; }
+        if ((m = /^layout:\s*(.*)$/.exec(s))){ if (m[1] !== "side by side" && m[1] !== "stacked") err(line, "layout: is " + q("side by side") + " or " + q("stacked") + "."); vis.layout = m[1]; return; }
+        if (/^view(\s|$)/.test(s)){ view = s.slice(4).trim(); if (!view) err(line, "A view needs a name, like " + q("view Part 1") + "."); else vis.views.push({ name: view, line: line }); return; }
+        if (/^panel(\s|$)/.test(s)){
+          var pk = s.slice(5).trim();
+          if (VISUAL_TYPES.indexOf(pk) < 0) err(line, "A panel is one of " + VISUAL_TYPES.join(", ") + (closest(pk, VISUAL_TYPES) ? ". Did you mean " + closest(pk, VISUAL_TYPES) + "?" : "."));
+          panel = { kind: VISUAL_TYPES.indexOf(pk) >= 0 ? pk : B.type, line: line, items: [] }; vis.panels.push(panel); view = null; return;
+        }
+        var clauses = splitTop(s, ";").filter(Boolean), main = clauses[0] || "", opts = clauses.slice(1);
+        var kw = main.split(/\s+/)[0], rest = main.slice(kw.length).trim(), am = /^([A-Za-z_]\w*)\s*:\s*(.*)$/.exec(main);
+        var it = { line: line, view: view, kw: kw, opts: [] };
+        if (kw !== "slider" && kw !== "input" && am){ kw = it.kw = "axis"; it.axis = am[1] === "y" ? "y" : "x"; it.name = am[1]; rest = am[2]; }
+        if (COMMON_LINES.indexOf(kw) < 0 && PANEL_LINES[panel.kind].indexOf(kw) < 0){
+          var where = Object.keys(PANEL_LINES).filter(function(k){ return PANEL_LINES[k].indexOf(kw) >= 0; });
+          if (where.length) err(line, q(kw === "axis" ? it.name + ":" : kw) + " lines go in a " + where.join(" or ") + " panel, not a " + panel.kind + ".");
+          else { var g2 = closest(kw, ALL_LINES); err(line, "There’s no visual line called " + q(kw) + (g2 ? ". Did you mean " + g2 + "?" : ".")); }
+          return;
+        }
+        if (kw === "set"){   // one list of assignments, so commas (a ; is accepted too)
+          splitTop([rest].concat(opts).join(","), ",").filter(Boolean).forEach(function(a){
+            var sm = /^([A-Za-z_]\w*)\s*=\s*(.+)$/.exec(a);
+            if (!sm) err(line, "set lines look like " + q("set dc = 1, N = 3") + ".");
+            else { it.opts.push({ name: sm[1], expr: exprAt(sm[2], line) }); }
+          });
+          panel.items.push(it); return;
+        }
+        var allowed = LINE_OPTS[kw] || [], bound = dict(), fv = null;
+        opts.forEach(function(o){ if (/^for\s/.test(o)){ fv = forVar(o, line); if (fv) bound[fv] = 1; } });
+        if (/^(axis|slider|toggle|curve|shade|mark|dot|stem|vector|input|radius)$/.test(kw) && splitTop(rest, ",").length > 1){
+          err(line, "The parts of a visual line are separated with ; (a , only separates the items of a list): " + q(s) + "."); return;
+        }
+        var need = function(re, example){ var r = re.exec(rest); if (!r) err(line, "A " + kw + " line looks like " + q(example) + "."); return r; };
+        var r;
+        switch (kw){
+          case "slider": if ((r = need(/^([A-Za-z_]\w*)\s*:\s*(.+?)\s+to\s+(.+)$/, "slider b: 0 to 2; step 0.05; start 1"))){ it.name = r[1]; exprAt(r[2], line); exprAt(r[3], line); } break;
+          case "toggle": if ((r = need(/^([A-Za-z_]\w*)$/, "toggle parts; label \"Show the parts\""))) it.name = r[1]; break;
+          case "input":   // input z: start 1.625; step 0.001 (the first option may sit right after the colon)
+            if ((r = need(/^([A-Za-z_]\w*)\s*:?\s*(.*)$/, "input z: start 1; step 0.1"))){ it.name = r[1]; if (r[2]) opts.unshift(r[2]); }
+            break;
+          case "axis": if ((r = need(/^(.+?)\s+to\s+(.+)$/, it.name + ": -2 to 2; ticks every 1"))){ exprAt(r[1], line); exprAt(r[2], line); } break;
+          case "curve": if (!rest) err(line, "A curve line names what to draw, like " + q("curve f") + " or " + q("curve sin(x)") + "."); else it.expr = exprAt(rest, line, bound, true); break;
+          case "shade": if ((r = need(/^(.+?)\s+from\s+(.+?)\s+to\s+(.+)$/, "shade f from 0 to b"))){ exprAt(r[1], line, bound, true); exprAt(r[2], line); exprAt(r[3], line); } break;
+          case "mark": if ((r = need(/^([xy])\s*=\s*(.+)$/, "mark x = 4/3; label \"E[X]\""))) exprAt(r[2], line, bound); break;
+          case "dot": case "stem":
+            r = /^\((.*)\)$/.exec(rest);
+            var pts = r ? splitTop(r[1], ",") : [];
+            if (pts.length !== 2) err(line, "A " + kw + " line gives a point, like " + q(kw + " (n, a(n)); for n = -9 to 9") + ".");
+            else pts.forEach(function(p){ exprAt(p, line, bound); });
+            break;
+          case "vector": if (!rest) err(line, "A vector line gives a complex value, like " + q("vector exp(j*n*pi/4); for n = 0 to 3") + "."); else exprAt(rest, line, bound); break;
+          case "radius": if (rest) exprAt(rest, line); else err(line, "radius needs a number, like " + q("radius 2") + "."); break;
+          case "rows":
+            if ((r = /^([A-Za-z_]\w*)\s*=\s*(.+?)\s+to\s+(.+?)(?:\s+step\s+(.+))?$/.exec(rest))) [r[2], r[3], r[4]].forEach(function(e){ if (e) exprAt(e, line); });
+            else if ((r = /^([A-Za-z_]\w*)\s+in\s+(.+)$/.exec(rest))) splitTop(r[2], ",").forEach(function(e){ exprAt(e, line); });
+            else err(line, "A rows line looks like " + q("rows n = -3 to 3") + " or " + q("rows n in 0, 1, 2") + ".");
+            break;
+          case "column": case "output":
+            if ((r = need(/^"([^"]*)"\s*=\s*(.+?)(?:\s*:\s*(\d+))?$/, kw + " \"$b_n$\" = exp(-j*n*pi) : 3"))){ textAt(r[1], line); exprAt(r[2], line); }
+            break;
+        }
+        opts.forEach(function(o){
+          var ow = o.split(/\s+/)[0], orest = o.slice(ow.length).trim();
+          if (allowed.indexOf(ow) < 0){
+            var g3 = closest(ow, allowed);
+            err(line, allowed.length ? q(ow) + " isn’t an option of a " + (kw === "axis" ? "axis" : kw) + " line" + (g3 ? ". Did you mean " + g3 + "?" : ". It takes " + allowed.join(", ") + ".") : q(kw) + " lines don’t take options.");
+            return;
+          }
+          it.opts.push({ word: ow, rest: orest });
+          switch (ow){
+            case "color": if (!/^[1-4]$/.test(orest)) err(line, "color is 1, 2, 3 or 4."); break;
+            case "width": if (!/^\d+(\.\d+)?$/.test(orest)) err(line, "width is a number, like " + q("width 3") + "."); break;
+            case "legend": case "label":
+              var lm = /^"([^"]*)"$/.exec(orest);
+              if (!lm) err(line, ow + " takes text in quotes, like " + ow + " \"E[X] = 4/3\".");
+              else textAt(lm[1], line, bound);
+              break;
+            case "muted": case "dashed": case "dotted": case "below": case "hollow": if (orest) err(line, ow + " doesn’t take a value."); break;
+            case "one": if (orest !== "color each") err(line, "Did you mean " + q("one color each") + "?"); break;
+            case "filled": var fm = /^if\s+(.+)$/.exec(orest); if (!fm) err(line, "filled is followed by a condition, like " + q("filled if kept(n)") + "."); else exprAt(fm[1], line, bound); break;
+            case "ticks":
+              var ev2 = /^every\s+(.+)$/.exec(orest);
+              if (ev2) exprAt(ev2[1], line);
+              else if (!orest) err(line, "ticks needs " + q("every 0.5") + " or a list, like " + q("ticks 0, 1, 2") + ".");
+              else splitTop(orest, ",").forEach(function(t){ var tm = /^(.+?)(?:\s+as\s+"([^"]*)")?$/.exec(t); exprAt(tm[1], line); });
+              break;
+            case "step": case "start": case "min": case "max": if (!orest) err(line, ow + " needs a value."); else exprAt(orest, line); break;
+          }
+        });
+        panel.items.push(it);
+      });
+      B.vis.vars = vars; B.vis.L = L;
+    }
+    function arity(f, n, L, line){
+      if (f in L){ if (L[f].params.length !== n) err(line, f + "() takes " + plural(L[f].params.length, "value") + ", not " + n + "."); return; }
+      if (f in FN){ var spec = FN[f]; if (n < spec[0] || n > spec[1]) err(line, f + "() takes " + (spec[0] === spec[1] ? plural(spec[0], "value") : "at least " + spec[0] + " values") + ", not " + n + "."); return; }
+      var g = closest(f, Object.keys(L).concat(Object.keys(FN)));
+      err(line, "There’s no function called " + q(f) + (g ? ". Did you mean " + g + "?" : ". Define it with let."));
+    }
+
+    // 4. Text: math has to close, refs have to point somewhere, live values have to work
+    function checkText(parts, scope){
+      var txt = "", starts = [];
+      parts.forEach(function(p){ starts.push([txt.length, p.line]); txt += p.text + "\n"; });
+      var lineAt = function(off){ var ln = starts.length ? starts[0][1] : 0; for (var k = 0; k < starts.length && starts[k][0] <= off; k++) ln = starts[k][1]; return ln; };
+      var masked = txt.replace(/\\\$/g, "  "), outside = [], last = 0, mm;
+      var mathRe = /\$\$[\s\S]*?\$\$|\$(?:[^$\n]|\n(?![ \t]*\n))+?\$/g;
+      while ((mm = mathRe.exec(masked))){ outside.push([last, masked.slice(last, mm.index)]); last = mm.index + mm[0].length; }
+      outside.push([last, masked.slice(last)]);
+      outside.forEach(function(seg){
+        var dd = seg[1].indexOf("$$"), d1 = seg[1].indexOf("$");
+        if (dd >= 0) err(lineAt(seg[0] + dd), "This $$ isn’t closed. Display math ends with another $$.");
+        else if (d1 >= 0) err(lineAt(seg[0] + d1), "This $ isn’t closed. To write a dollar sign, use \\$.");
+        var rm; REF_RE.lastIndex = 0;
+        while ((rm = REF_RE.exec(seg[1]))) refs.push({ id: rm[1], line: lineAt(seg[0] + rm.index) });
+      });
+      var lm; LIVE_RE.lastIndex = 0;
+      while ((lm = LIVE_RE.exec(masked))){
+        var line = lineAt(lm.index), node;
+        try { node = parseExpr(lm[1]); } catch (e){ err(line, "In the live value {= " + lm[1] + "}: " + e.message + "."); continue; }
+        var nm = names(node, scope.bound || dict());
+        Object.keys(nm.vars).forEach(function(v){
+          if (!(v in scope.vars) && !(v in scope.L) && !(v in CONSTS)) err(line, "In the live value {= " + lm[1] + "}, " + q(v) + " isn’t defined.");
+        });
+        Object.keys(nm.calls).forEach(function(f){ arity(f, nm.calls[f], scope.L, line); });
+      }
+    }
+    blocks.forEach(function(B){
+      if (B.spec.visual) return;
+      var hasRefsInTitle = B.title && /\{\{/.test(B.title);
+      if (B.type === "step" && hasRefsInTitle){   // refs on a step's @ line become its "Uses" tags
+        B.uses = [];
+        B.title = B.title.replace(REF_RE, function(all, id){ B.uses.push(id); refs.push({ id: id, line: B.line }); return ""; }).replace(/\s+/g, " ").trim();
+      }
+      var parts = (B.title ? [{ line: B.line, text: B.title }] : []).concat(B.body);
+      checkText(parts, { L: letsFor(B), vars: fileVars });
+    });
+
+    // 5. Refs: {{F2}}, {{P3}} or {{P3.b}}
+    var used = dict();
+    refs.forEach(function(r){
+      var dot = r.id.indexOf("."), base = dot < 0 ? r.id : r.id.slice(0, dot), pt = dot < 0 ? null : r.id.slice(dot + 1);
+      var target = ids[base];
+      if (!target){ var g = closest(base, Object.keys(ids)); err(r.line, "{{" + r.id + "}} doesn’t match any formula, definition or problem" + (g ? ". Did you mean {{" + g + "}}?" : ".")); return; }
+      if (pt != null && (target.type !== "problem" || !target.parts.some(function(x){ return x.id === pt; }))){ err(r.line, "{{" + r.id + "}}: problem " + base + " has no part " + pt + "."); return; }
+      used[base] = (used[base] || 0) + 1;
+    });
+
+    // 6. Let bodies: every name a let uses has to exist somewhere (each let once, in the scope it was written in)
+    var seenLet = dict();
+    [frameLets].concat(problems.map(function(p){ return p.L; }), blocks.filter(function(B){ return B.vis; }).map(function(B){ return B.vis.L; })).forEach(function(L){
+      Object.keys(L).forEach(function(k){
+        var Lk = L[k], key = Lk.line + ":" + k, bound = dict();
+        if (seenLet[key]) return;
+        seenLet[key] = 1;
+        Lk.params.forEach(function(p){ bound[p] = 1; });
+        var nm = names(Lk.body, bound);
+        Object.keys(nm.vars).forEach(function(v){ if (!(v in L) && !(v in CONSTS) && !(v in fileVars)) err(Lk.line, "In let " + Lk.name + ", " + q(v) + " isn’t defined."); });
+        Object.keys(nm.calls).forEach(function(f){ arity(f, nm.calls[f], L, Lk.line); });
+      });
+    });
+
+    // 7. check: lines, worked out with the lets of their problem
+    var checks = [];
+    blocks.forEach(function(B){
+      B.checks.forEach(function(c){
+        var parts = splitCheck(c.text), rec = { line: c.line, text: c.text, ok: false };
+        checks.push(rec); B.checkRecs = (B.checkRecs || []).concat([rec]);
+        if (!parts || !parts[0] || !parts[1]){ err(c.line, "A check: line is " + q("check: <what to work out> = <what it should be>") + "."); return; }
+        try {
+          var L = letsFor(B), got = evaluate(parseExpr(parts[0]), L), want = evaluate(parseExpr(parts[1]), L);
+          var dm = /^[-+]?\d*\.(\d+)$/.exec(parts[1]);
+          var tol = dm ? 0.5 * Math.pow(10, -dm[1].length) : 1e-6 * Math.max(1, cabs(want));
+          var diff = cabs(csub(got, want));
+          rec.got = got; rec.ok = isFinite(diff) && diff <= tol + 1e-12;
+          if (!rec.ok) err(c.line, "Check failed: " + parts[0] + " works out to " + fmtNum(got) + ", not " + parts[1] + ".");
+        } catch (e){ err(c.line, "In this check: " + e.message + "."); }
+      });
+    });
+
+    // 8. Warnings
+    if (!frame.props.title) warn(frame.line, "The file has no title: line, so its ID is shown instead.");
+    if (frame.props.kind && ["homework", "notes", "review", "formulas"].indexOf(frame.props.kind) < 0) warn(frame.propLine.kind, "kind: is homework, notes, review or formulas.");
+    var stepsOk = function(v, line){ if (v && v !== "per part" && v !== "per problem") warn(line, "steps: is " + q("per part") + " or " + q("per problem") + "."); };
+    stepsOk(frame.props.steps, frame.propLine.steps);
+    blocks.forEach(function(B){
+      if (B.props.style && STYLES[B.type] && STYLES[B.type].indexOf(B.props.style) < 0) warn(B.propLine.style, "style: on @" + B.type + " is " + STYLES[B.type].join(" or ") + ".");
+      if (B.type === "problem"){
+        stepsOk(B.props.steps, B.propLine.steps);
+        var stray = B.body.filter(function(x){ return x.text.trim(); })[0];
+        if (stray) warn(stray.line, "Text right under @problem isn’t shown. Put the problem statement in a @given.");
+      }
+      if (B.type === "part" && !B.answered && B.problem) warn(B.line, "Part " + B.id + " of " + B.problem.id + " has no @answer.");
+      if (B.type === "answer" && !B.checks.length && B.body.some(function(x){ return /\d/.test(x.text); })) warn(B.line, "This answer has a number but no check: line, so nothing confirms it.");
+    });
+    var kind = frame.props.kind || "homework";
+    if (kind === "homework" || kind === "review") formulas.forEach(function(F){
+      if (F.id && !used[F.id]) warn(F.line, "{{" + F.id + "}} isn’t used by any step. Tag a step with it, or take it out of the bank.");
+    });
+    var byLine = function(a, b2){ return a.line - b2.line; };
+    errors.sort(byLine); warnings.sort(byLine);
+
+    // what the rest of the app reads
+    var intro = [], para = [];
+    frame.body.forEach(function(x){ var t = x.text.trim(); if (t) para.push(t); else if (para.length){ intro.push(para.join(" ")); para = []; } });
+    if (para.length) intro.push(para.join(" "));
+    return {
+      id: frame.id || "", title: frame.props.title || "", cls: frame.props["class"] || "", folder: frame.props.folder || "", subtitle: frame.props.subtitle || "",
+      kind: kind, steps: frame.props.steps || "per part", intro: intro, lines: lines,
+      facts: frame.facts.map(function(f){ var eq = f.text.indexOf("="); return eq > 0 ? [f.text.slice(0, eq).trim(), f.text.slice(eq + 1).trim()] : ["", f.text]; }),
+      problems: problems.map(function(p){ return { id: p.id, title: p.title, points: p.props.points || "", short: p.props.short || "", label: p.props.label || "", line: p.line }; }),
+      formulas: formulas.map(function(F){ return { kind: F.type, id: F.id, title: F.title, line: F.line }; }),
+      errors: errors, warnings: warnings, checks: checks, blocks: blocks, items: items, lets: frameLets
+    };
+  }
+  function reportSummary(info){
+    var n = info.checks.length, bad = info.checks.filter(function(c){ return !c.ok; }).length, parts = [];
+    if (info.errors.length) parts.push(plural(info.errors.length, "error"));
+    if (info.warnings.length) parts.push(plural(info.warnings.length, "warning"));
+    return { text: parts.join(" · "), checks: n ? (n - bad) + " of " + plural(n, "check") + " pass" : "", level: info.errors.length ? "bad" : info.warnings.length ? "warn" : "good" };
+  }
+  function reportText(id){   // the load report, ready to paste back to whatever wrote the file
+    var f = FILES[id], info = INFO[id];
+    if (!f || !info) return "";
+    var out = ["TrainFrame load report for " + (f.fileName || id + ".frame") + " (@frame {" + id + "}), checked against frame language v" + LANGUAGE_VERSION + "."];
+    var list = function(head, rows){ if (!rows.length) return; out.push("", head); rows.forEach(function(r){ out.push("- line " + r.line + ": " + r.msg + "  >  " + (info.lines[r.line - 1] || "").trim()); }); };
+    list("Errors (each one leaves something out of the walkthrough):", info.errors);
+    list("Warnings:", info.warnings);
+    if (!info.errors.length && !info.warnings.length) out.push("", "No errors or warnings.");
+    if (info.checks.length) out.push("", reportSummary(info).checks + ".");
+    out.push("", "Fix these and send back the whole corrected .frame file. The language is described in docs/LANGUAGE.md.");
+    return out.join("\n");
   }
 
   /* ---------- Where a file lives: its class and folder ---------- */
@@ -881,7 +1606,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   // TABS.classes: the open class tabs in order. TABS.cur: the class showing (or last shown). TABS.by[class]: that class's place,
   // { section, path, files (its open file tabs), file (the one showing, or null for a section) }, kept when its tab closes.
   var SECTIONS = ["assignments", "formulas", "search", "add"];
-  var TABS = { classes: [], cur: null, by: {} };
+  var TABS = { classes: [], cur: null, by: {}, files: [] };   // files: every open file tab, from any class
   var SCREEN = "home", lastMain = "home";   // home, class, help or settings; lastMain is where Back returns to
   var SCROLL = {};   // view key -> scrollY when it was left; files' spots are kept across visits (localStorage trainFrame:scroll)
   try { SCROLL = JSON.parse(localStorage.getItem(NS + "scroll")) || {}; } catch (e){}
@@ -894,6 +1619,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       TABS.classes = t.classes.filter(function(c){ return typeof c === "string"; });
       TABS.cur = typeof t.cur === "string" ? t.cur : null;
       TABS.by = t.by && typeof t.by === "object" ? t.by : {};
+      TABS.files = Array.isArray(t.files) ? t.files : [];
     }
     tidyTabs();
   }
@@ -909,11 +1635,11 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   function tidyTabs(){   // drop tabs for classes and files that are gone or moved to another class
     var list = classList();
     TABS.classes = TABS.classes.filter(function(c, i, a){ return list.indexOf(c) >= 0 && a.indexOf(c) === i; });
+    TABS.files = (TABS.files || []).filter(function(id, i, a){ return FILES[id] && a.indexOf(id) === i; });
     Object.keys(TABS.by).forEach(function(c){
       if (list.indexOf(c) < 0){ delete TABS.by[c]; return; }
       var s = cst(c);
-      s.files = s.files.filter(function(id, i, a){ return FILES[id] && clsOf(FILES[id]) === c && a.indexOf(id) === i; });
-      if (s.files.indexOf(s.file) < 0) s.file = null;
+      if (!FILES[s.file] || clsOf(FILES[s.file]) !== c || TABS.files.indexOf(s.file) < 0) s.file = null;
       if (s.path && foldersOf(c).indexOf(s.path) < 0) s.path = "";
     });
     if (TABS.classes.indexOf(TABS.cur) < 0) TABS.cur = null;
@@ -951,7 +1677,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     var at = TABS.classes.indexOf(TABS.cur);
     if (at < 0) TABS.classes.push(cls); else TABS.classes.splice(at + 1, 0, cls);
   }
-  function openClass(cls){ nav(function(){ addClassTab(cls); TABS.cur = cls; SCREEN = "class"; }); }
+  function openClass(cls){ nav(function(){ addClassTab(cls); TABS.cur = cls; SCREEN = "class"; cst(cls).file = null; }); }
   function closeClass(cls){
     nav(function(){
       var at = TABS.classes.indexOf(cls);
@@ -960,27 +1686,31 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       if (TABS.cur === cls){ TABS.cur = TABS.classes[Math.min(at, TABS.classes.length - 1)] || null; if (!TABS.cur) SCREEN = "home"; }
     });
   }
-  function addFileTab(s, id){
-    if (s.files.indexOf(id) >= 0) return;
-    var at = s.files.indexOf(s.file);
-    if (at < 0) s.files.push(id); else s.files.splice(at + 1, 0, id);
+  function curFile(){ return SCREEN === "class" && TABS.cur ? cst(TABS.cur).file : null; }
+  function addFileTab(id){
+    if (TABS.files.indexOf(id) >= 0) return;
+    var at = TABS.files.indexOf(curFile());
+    if (at < 0) TABS.files.push(id); else TABS.files.splice(at + 1, 0, id);
   }
   function openFile(id, line){
     var f = FILES[id];
     if (!f) return;
     nav(function(){
       var cls = clsOf(f), s = cst(cls);
+      addFileTab(id);
       addClassTab(cls); TABS.cur = cls; SCREEN = "class";
-      addFileTab(s, id); s.file = id; pendingLine = line || 0;
+      s.file = id; pendingLine = line || 0;
     });
   }
-  function closeFile(cls, id){
+  function closeFile(id){
     nav(function(){
-      var s = cst(cls), at = s.files.indexOf(id);
+      var at = TABS.files.indexOf(id), showing = curFile() === id;
       if (at < 0) return;
-      s.files.splice(at, 1);
-      if (s.file === id) s.file = s.files[Math.min(at, s.files.length - 1)] || null;
+      TABS.files.splice(at, 1);
       delete SCROLL["f:" + id];
+      if (FILES[id]) cst(clsOf(FILES[id])).file = null;
+      var next = showing && FILES[TABS.files[Math.min(at, TABS.files.length - 1)]];
+      if (next){ var c = clsOf(next); addClassTab(c); TABS.cur = c; cst(c).file = next.id; }
     });
   }
   function showSection(sec){ nav(function(){ var s = cst(TABS.cur); s.file = null; s.section = sec; }); }
@@ -999,13 +1729,19 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       if (t.getAttribute("data-tab") === SCREEN) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
     });
     renderClassTabs();
-    var onFile = SCREEN === "class" && !!cst(TABS.cur).file;
-    el("noteDock").classList.toggle("hidden", !onFile);
+    var onFile = !!curFile();
+    el("fstrip").classList.toggle("hidden", !TABS.files.length);
+    el("fileTabs").innerHTML = TABS.files.map(function(id){ return tabHtml("f", id, titleOf(FILES[id]), id === curFile()); }).join("");
+    keepInView(el("fileTabs"));
+    el("noteToggle").classList.toggle("hidden", !onFile);
+    el("fxToggle").classList.toggle("hidden", !onFile);
+    if (!onFile){ el("notePanel").classList.add("hidden"); el("fxPanel").classList.add("hidden"); el("noteToggle").setAttribute("aria-expanded", "false"); el("fxToggle").setAttribute("aria-expanded", "false"); }
     syncHistory(SCREEN === "home" || SCREEN === "class");
     if (SCREEN === "home") renderHome();
     else if (SCREEN === "class") renderClass();
     else if (SCREEN === "settings") renderSettings();
     if (!onFile) cur = null;
+    if (onFile && !el("fxPanel").classList.contains("hidden")) renderFx();
     setStick();
   }
   function tabHtml(kind, key, label, on){   // a closable tab: kind "c" for a class, "f" for a file
@@ -1024,9 +1760,10 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     keepInView(box);
   }
   function setStick(){   // --bar: the top bar's height; --stick: everything sticky above the page (the top bar, and a class's tabs and sections)
-    var bar = document.querySelector(".appbar").offsetHeight, h = SCREEN === "class" ? el("chead").offsetHeight : 0;
+    var bar = document.querySelector(".appbar").offsetHeight, st = el("fstrip").offsetHeight, h = SCREEN === "class" ? el("chead").offsetHeight : 0;
     document.documentElement.style.setProperty("--bar", bar + "px");
-    document.documentElement.style.setProperty("--stick", bar + h + "px");
+    document.documentElement.style.setProperty("--strip", st + "px");
+    document.documentElement.style.setProperty("--stick", bar + st + h + "px");
   }
   function classCard(c){
     var n = filesIn(c).length, nf = foldersOf(c).filter(function(p){ return p.indexOf("/") < 0; }).length, meta = [plural(n, "file")];
@@ -1052,9 +1789,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   function placeAddPane(box){ if (el("addPane").parentNode !== box) box.appendChild(el("addPane")); }
   function renderClass(){
     var cls = TABS.cur, s = cst(cls);
-    el("fstrip").classList.toggle("hidden", !s.files.length);
-    el("fileTabs").innerHTML = s.files.map(function(id){ return tabHtml("f", id, titleOf(FILES[id]), id === s.file); }).join("");
-    keepInView(el("fileTabs"));
+    el("libhead").classList.toggle("hidden", !!s.file);
     Array.prototype.forEach.call(el("secTabs").children, function(b){ b.setAttribute("aria-selected", !s.file && b.getAttribute("data-sec") === s.section ? "true" : "false"); });
     el("secView").classList.toggle("hidden", !!s.file);
     el("fileView").classList.toggle("hidden", !s.file);
@@ -1095,7 +1830,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         var meta = [plural(info.problems.length, "problem"), plural(info.formulas.length, "formula"), "added " + fmtAgo(f.addedAt)];
         html += '<article class="card fcard"><div class="kick">' + esc(info.subtitle || f.fileName || f.id) + '</div>' +
           '<button class="open" type="button" data-open="' + esc(f.id) + '">' + esc(titleOf(f)) + '</button>' +
-          '<div class="meta">' + esc(meta.join(" · ")) + '</div>' +
+          '<div class="meta">' + esc(meta.join(" · ")) + '</div>' + cardStatus(info) +
           '<div class="acts"><button class="linkbtn" type="button" data-act="move" data-id="' + esc(f.id) + '">Move</button>' +
           '<button class="linkbtn" type="button" data-act="rename" data-id="' + esc(f.id) + '">Rename</button>' +
           '<button class="linkbtn" type="button" data-act="dl" data-id="' + esc(f.id) + '">Download</button>' +
@@ -1110,6 +1845,11 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         (mine && path ? '<div class="btns"><button class="btn ghost sm" type="button" data-act="rmplace">Remove this folder</button></div>' : "") + '</div>';
     }
     box.innerHTML = html;
+  }
+  function cardStatus(info){
+    if (!info.checks) return "";
+    var sum = reportSummary(info), t = sum.text || (sum.checks ? "\u2713 " + sum.checks : "\u2713 Loaded clean");
+    return '<div class="lstat ' + sum.level + '">' + esc(t) + '</div>';
   }
   function renderFormulas(cls){
     var files = filesIn(cls).filter(function(f){ return INFO[f.id] && INFO[f.id].formulas.length; });
@@ -1145,9 +1885,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     var report = [], chain = Promise.resolve();
     items.forEach(function(it){
       chain = chain.then(function(){
-        var info = readFrame(it.text);
+        var info = parseFrame(it.text);
         if (!info){ report.push({ kind: "bad", name: it.name, msg: "doesn’t start with an @frame line, so it isn’t a frame file." }); return; }
-        if (!/^[A-Za-z0-9_-]+$/.test(info.id)){ report.push({ kind: "bad", name: it.name, msg: "needs a file id on its @frame line, made of letters, digits, - or _ (like @frame ecen305-hw3)." }); return; }
+        if (!/^[A-Za-z0-9_-]+$/.test(info.id)){ report.push({ kind: "bad", name: it.name, msg: "needs a file ID in braces on its @frame line, made of letters, digits, - or _ (like @frame {ecen305-hw3})." }); return; }
         var old = FILES[info.id];
         if (old && old.text === it.text){ report.push({ kind: "same", name: it.name, id: info.id, msg: "is already here, unchanged." }); return; }
         if (old && !window.confirm("Replace “" + titleOf(old) + "” with the copy in " + it.name + "?\n\nYour notes and the place you filed it are kept.")){
@@ -1157,7 +1897,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         var rec = { id: info.id, text: it.text, fileName: it.name, addedAt: old ? old.addedAt : now, updatedAt: now,
                     cls: old ? old.cls : null, folder: old ? old.folder : null, title: old ? old.title : null };
         FILES[rec.id] = rec; INFO[rec.id] = info;
-        report.push({ kind: "ok", name: it.name, id: rec.id, msg: (old ? "replaced the copy in " : "added to ") + placeLabel(rec) + "." });
+        var sum = reportSummary(info);
+        report.push({ kind: "ok", level: sum.level === "good" ? "" : sum.level, name: it.name, id: rec.id, msg: (old ? "replaced the copy in " : "added to ") + placeLabel(rec) + "." +
+          (sum.text ? " " + sum.text + ". Open it to see the load report." : sum.checks ? " Loaded clean: " + sum.checks + "." : " Loaded clean.") });
         return putRecord("files", rec);
       });
     });
@@ -1188,7 +1930,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   }
   function showReport(report){
     el("addReport").innerHTML = report.map(function(r){
-      return '<li class="' + (r.kind === "ok" ? "" : r.kind) + '"><span><b>' + esc(r.name) + '</b> ' + esc(r.msg) + '</span>' +
+      return '<li class="' + (r.kind === "ok" ? r.level || "" : r.kind) + '"><span><b>' + esc(r.name) + '</b> ' + esc(r.msg) + '</span>' +
         (r.id && FILES[r.id] ? '<button class="linkbtn" type="button" data-open="' + esc(r.id) + '">Open</button>' : "") + '</li>';
     }).join("");
   }
@@ -1232,8 +1974,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       } else return;
       putRecord("files", f);
       nav(function(){
-        var now = clsOf(f), os = cst(was);
-        if (now !== was && os.files.indexOf(id) >= 0) addFileTab(cst(now), id);   // an open tab follows the file to its new class
+        var now = clsOf(f);
         addClassTab(now); TABS.cur = now; SCREEN = "class";
         var s = cst(now); s.file = null; s.section = "assignments"; s.path = folderOf(f);
       });
@@ -1330,7 +2071,6 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       if (os){
         var s = cst(nu);
         if (!exists){ TABS.by[nu] = os; s = cst(nu); }
-        else os.files.forEach(function(id){ addFileTab(s, id); });
         delete TABS.by[old];
       }
       if (TABS.cur === old) TABS.cur = nu;
@@ -1382,7 +2122,11 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     html += '<header class="fhead">' + (info.subtitle ? '<div class="kick">' + esc(info.subtitle) + '</div>' : "") + '<h1>' + esc(titleOf(f)) + '</h1>';
     if (info.facts.length) html += '<div class="facts">' + info.facts.map(function(x){ return '<span class="fact">' + (x[0] ? '<b>' + esc(x[0]) + '</b>' : "") + esc(x[1]) + '</span>'; }).join("") + '</div>';
     if (info.intro.length) html += '<div class="intro">' + info.intro.map(function(p){ return '<p>' + esc(p) + '</p>'; }).join("") + '</div>';
-    html += '</header><div class="pending"><p>The renderer that turns this into steps, formula cards and plots is the next part of TrainFrame to be built. Until then, here’s the file’s source.</p></div>';
+    html += '</header>' + loadReportHtml(id, info);
+    html += '<div class="pending"><p>The renderer that turns this into steps, formula cards and plots is the next part of TrainFrame to be built. Until then, here\u2019s the file\u2019s source.</p></div>';
+    var marks = dict();
+    info.warnings.forEach(function(r){ marks[r.line] = "lw"; });
+    info.errors.forEach(function(r){ marks[r.line] = "le"; });
     var probLines = {}, fxLine = info.formulas.length ? info.formulas[0].line : -1;
     info.problems.forEach(function(p){ probLines[p.line] = p.id; });
     html += '<div class="src" id="srcView">' + info.lines.map(function(t, i){
@@ -1390,9 +2134,22 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       if (t.charAt(0) === "@") c += " blk"; else if (/^\s*\/\//.test(t)) c += " cm";
       if (probLines[n]) c += " prob";
       if (n === fxLine) c += " fx";
+      if (marks[n]) c += " " + marks[n];
       return '<div class="' + c + '" id="L' + n + '"' + (probLines[n] ? ' data-p="' + esc(probLines[n]) + '"' : "") + '><span class="no">' + n + '</span><span class="tx">' + (esc(t) || " ") + '</span></div>';
     }).join("") + '</div>';
     el("frameMain").innerHTML = html;
+  }
+  function loadReportHtml(id, info){
+    var sum = reportSummary(info);
+    if (sum.level === "good") return '<section class="card lrep good"><div class="lrep-h"><b>Loaded clean.</b><span class="muted">' + esc(sum.checks ? sum.checks + "." : "No checks in this file.") + '</span></div></section>';
+    var row = function(r, k){ return '<li class="' + k + '"><button class="ln" type="button" data-jump="' + r.line + '">line ' + r.line + '</button><span>' + esc(r.msg) + '</span></li>'; };
+    return '<section class="card lrep ' + sum.level + '"><div class="lrep-h"><b>' + esc(sum.text) + '</b>' + (sum.checks ? '<span class="muted">' + esc(sum.checks) + '</span>' : "") +
+      '<span class="sp"></span><button class="btn sm subtle" type="button" data-act="copyreport" data-id="' + esc(id) + '">Copy report for AI</button></div>' +
+      '<ul>' + info.errors.map(function(r){ return row(r, "e"); }).join("") + info.warnings.map(function(r){ return row(r, "w"); }).join("") + '</ul></section>';
+  }
+  function copyText(t, done){
+    var ok = function(){ showToast(done, "OK", null, "info"); }, no = function(){ showToast("Your browser blocked copying. Download the file and copy the report from here instead.", "OK", null); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, no); else no();
   }
   function goLine(n, flash){
     var t = el("L" + n);
@@ -1402,7 +2159,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   }
   function spy(){   // the problem you're reading: the last one whose heading has scrolled up past the sticky bars
     if (!cur || SCREEN !== "class") return;
-    var stick = document.querySelector(".appbar").offsetHeight + el("chead").offsetHeight, top = stick + (window.innerWidth <= 900 ? 60 : 40), now = null;
+    var stick = document.querySelector(".appbar").offsetHeight + el("fstrip").offsetHeight + el("chead").offsetHeight, top = stick + (window.innerWidth <= 900 ? 60 : 40), now = null;
     var heads = document.querySelectorAll("#srcView .prob");
     for (var i = 0; i < heads.length; i++){ if (heads[i].getBoundingClientRect().top <= top + 4) now = heads[i].getAttribute("data-p"); else break; }
     var fx = document.querySelector("#srcView .fx");
@@ -1418,8 +2175,50 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 
   /* ---------- Notes: one box per file, saved as you type (as in QuizQrusher) ---------- */
   var noteTimer = null;
+  /* ---------- Formula bank in the dock: the open file's formulas and definitions, with KaTeX for the math ---------- */
+  var katexState = 0;   // 0 not loaded, 1 loading, 2 ready
+  function needKatex(){
+    if (katexState) return;
+    katexState = 1;
+    var sc = document.createElement("script"); sc.src = "vendor/katex.min.js";
+    sc.onload = function(){ katexState = 2; if (!el("fxPanel").classList.contains("hidden")) renderFx(); };
+    sc.onerror = function(){ katexState = 0; };
+    document.head.appendChild(sc);
+  }
+  function mathHtml(t){   // $$..$$ and $..$ through KaTeX (as MathML), everything else as text
+    var out = "", re = /\$\$([\s\S]*?)\$\$|\$([^$\n]+?)\$/g, last = 0, m;
+    var tex = function(src, disp){
+      if (katexState === 2 && window.katex){ try { return window.katex.renderToString(src, { displayMode: disp, output: "mathml", throwOnError: false }); } catch (e){} }
+      return "<code>" + esc(src) + "</code>";
+    };
+    while ((m = re.exec(t))){ out += esc(t.slice(last, m.index)); out += m[1] != null ? tex(m[1], true) : tex(m[2], false); last = m.index + m[0].length; }
+    return out + esc(t.slice(last));
+  }
+  function renderFx(){
+    var info = INFO[cur];
+    if (!info) return;
+    needKatex();
+    el("fxTitle").textContent = "Formulas · " + titleOf(FILES[cur]);
+    var html = info.formulas.map(function(x){
+      var body = [];
+      for (var k = x.line; k < info.lines.length && info.lines[k].charAt(0) !== "@"; k++){
+        var t = info.lines[k];
+        if (/^\s*\/\//.test(t) || /^\s*(group|style):/.test(t)) continue;
+        body.push(t);
+      }
+      var paras = body.join("\n").trim().split(/\n\s*\n/).map(function(p){ return "<p>" + mathHtml(p) + "</p>"; }).join("");
+      return '<div class="fxcard"><h4><span>' + esc(x.id) + '</span>' + esc(x.title) + '</h4><div class="fxb">' + paras + '</div></div>';
+    }).join("");
+    el("fxList").innerHTML = html || '<p class="muted">This file has no formulas.</p>';
+  }
+  function setFxOpen(on){
+    el("fxPanel").classList.toggle("hidden", !on);
+    el("fxToggle").setAttribute("aria-expanded", on ? "true" : "false");
+    if (on){ setNotesOpen(false); renderFx(); }
+  }
   function setNotesOpen(on, focus){
     el("notePanel").classList.toggle("hidden", !on);
+    if (on){ el("fxPanel").classList.add("hidden"); el("fxToggle").setAttribute("aria-expanded", "false"); }
     el("noteToggle").setAttribute("aria-expanded", on ? "true" : "false");
     try { localStorage.setItem(NS + "notesOpen", on ? "1" : "0"); } catch (e){}
     if (on && focus) el("noteText").focus();
@@ -1624,9 +2423,9 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     if (!data || data.type !== "trainframe-backup") return showToast("That .json file isn’t a TrainFrame backup.", "OK", null);
     var nf = 0, nn = 0;
     (data.files || []).forEach(function(f){
-      if (!f || !f.id || typeof f.text !== "string" || !readFrame(f.text)) return;
+      if (!f || !f.id || typeof f.text !== "string" || !parseFrame(f.text)) return;
       if (FILES[f.id] && (FILES[f.id].updatedAt || 0) >= (f.updatedAt || 0)) return;
-      FILES[f.id] = f; INFO[f.id] = readFrame(f.text); putRecord("files", f); nf++;
+      FILES[f.id] = f; INFO[f.id] = parseFrame(f.text); putRecord("files", f); nf++;
     });
     (data.notes || []).forEach(function(n){
       if (!n || !n.id || typeof n.text !== "string") return;
@@ -1726,10 +2525,10 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     if (!key) return;
     if (kind === "c"){
       if (x) closeClass(key);
-      else if (!(SCREEN === "class" && TABS.cur === key)) nav(function(){ TABS.cur = key; SCREEN = "class"; });
+      else nav(function(){ TABS.cur = key; SCREEN = "class"; cst(key).file = null; });
     } else {
-      if (x) closeFile(TABS.cur, key);
-      else if (cst(TABS.cur).file !== key) nav(function(){ cst(TABS.cur).file = key; });
+      if (x) closeFile(key);
+      else if (curFile() !== key) openFile(key);
     }
   }
   el("clsTabs").addEventListener("click", function(e){ onTabs(e, "c"); });
@@ -1745,9 +2544,10 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   });
   // clicks inside the Library and a class, by data attributes
   function onAct(e){
-    var t = e.target.closest("[data-copen], [data-act], [data-open], [data-go]");
+    var t = e.target.closest("[data-copen], [data-act], [data-open], [data-go], [data-jump]");
     if (!t) return;
     if (t.hasAttribute("data-copen")) return openClass(t.getAttribute("data-copen"));
+    if (t.hasAttribute("data-jump")) return goLine(+t.getAttribute("data-jump"), true);
     if (t.hasAttribute("data-open")) return openFile(t.getAttribute("data-open"), +t.getAttribute("data-line") || 0);
     if (t.hasAttribute("data-go")) return goFolder(t.getAttribute("data-cls"), t.getAttribute("data-go"));
     var act = t.getAttribute("data-act"), id = t.getAttribute("data-id");
@@ -1763,6 +2563,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     else if (act === "rename") renameFile(id);
     else if (act === "dl"){ var f = FILES[id]; if (f) download(f.text, f.fileName || f.id + ".frame", "text/plain"); }
     else if (act === "del") deleteFile(id);
+    else if (act === "copyreport") copyText(reportText(id), "Copied the load report. Paste it to the AI that wrote the file.");
   }
   el("homeScreen").addEventListener("click", onAct);
   el("classScreen").addEventListener("click", onAct);
@@ -1795,6 +2596,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   });
 
   el("noteToggle").addEventListener("click", function(){ setNotesOpen(el("notePanel").classList.contains("hidden"), true); });
+  el("fxToggle").addEventListener("click", function(){ setFxOpen(el("fxPanel").classList.contains("hidden")); });
+  el("fxClose").addEventListener("click", function(){ setFxOpen(false); el("fxToggle").focus(); });
   el("noteClose").addEventListener("click", function(){ setNotesOpen(false); el("noteToggle").focus(); });
   el("noteText").addEventListener("input", function(){ clearTimeout(noteTimer); noteTimer = setTimeout(saveNote, 400); noteStatus("Saving…"); });
   el("noteHeading").addEventListener("click", insertHeading);
@@ -1822,7 +2625,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     else if (!el("notePanel").classList.contains("hidden") && el("noteDock").contains(document.activeElement)){ setNotesOpen(false); el("noteToggle").focus(); }
   });
   window.addEventListener("pagehide", function(){ if (noteTimer) saveNote(); captureScroll(); saveTabs(); });
-  if (window.ResizeObserver){ var ro = new ResizeObserver(setStick); ro.observe(el("chead")); ro.observe(document.querySelector(".appbar")); }
+  if (window.ResizeObserver){ var ro = new ResizeObserver(setStick); ro.observe(el("chead")); ro.observe(el("fstrip")); ro.observe(document.querySelector(".appbar")); }
 
   /* ---------- Startup ---------- */
   el("appVersion").textContent = APP_VERSION;
@@ -1837,7 +2640,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   }).then(function(r){
     r[3].forEach(function(c){ if (c && c.id) CLASSES[c.id] = c; });
     rebuildAlias();
-    r[0].forEach(function(f){ if (f && f.id && typeof f.text === "string"){ var info = readFrame(f.text); if (info){ FILES[f.id] = f; INFO[f.id] = info; } } });
+    r[0].forEach(function(f){ if (f && f.id && typeof f.text === "string"){ var info = parseFrame(f.text); if (info){ FILES[f.id] = f; INFO[f.id] = info; } } });
     r[1].forEach(function(n){ if (n && n.id && typeof n.text === "string") NOTES[n.id] = n; });
     r[2].forEach(function(p){ if (p && p.id && p.cls) PLACES[p.id] = p; });
     loadTabs();
@@ -1852,7 +2655,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 
   window.__tf = { files: FILES, info: INFO, notes: NOTES, places: PLACES, classes: CLASSES, tabs: function(){ return JSON.parse(JSON.stringify(TABS)); },
                   get screen(){ return SCREEN; }, get cur(){ return cur; }, get curProblem(){ return curProblem; },
-                  readFrame: readFrame, importTexts: importTexts, afterImport: afterImport, openFile: openFile, openClass: openClass, closeFile: closeFile, closeClass: closeClass,
+                  parse: parseFrame, reportText: reportText, evalExpr: function(src, vars){ return evaluate(parseExpr(src), dict(), vars); }, fmtNum: fmtNum,
+                  importTexts: importTexts, afterImport: afterImport, openFile: openFile, openClass: openClass, closeFile: closeFile, closeClass: closeClass,
                   showSection: showSection, goFolder: goFolder, showScreen: showScreen, clsOf: clsOf, goLine: goLine,
                   flush: function(){ if (noteTimer) saveNote(); return saveChain; } };
 })();

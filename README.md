@@ -10,7 +10,7 @@ The app is written once. Every new file is only content.
 
 **Use it:** https://braxtonstryker.github.io/TrainFrame/ (once it's published)
 
-**Status: 0.1, the working shell.** You can add files, file them into classes and folders, work in class and file tabs, open a file with its problem rail, notes box and calculator window, and change settings. An open file still shows its source. The renderer that makes it interactive and the calculator's keys come next ([PLAN.md](PLAN.md) has the steps).
+**Status: 0.2.** You can add files, file them into classes and folders, work in class and file tabs, open a file with its problem rail, notes, formula bank and calculator window, and change settings. Every file is checked when it loads: its math checks are worked out, and a load report lists any errors with line numbers (with a **Copy report for AI** button). An open file still shows its source. The renderer that makes it interactive and the calculator's keys come next ([PLAN.md](PLAN.md) has the steps).
 
 - **Classes and folders.** The Library lists every class. A file's `class:` line picks its class and its `folder:` line picks the folder. You can move files, and rename, archive or delete classes, in the app.
 - **Tabs that remember.** Open classes get tabs next to Library, and each class's open files get tabs above its sections (Assignments, Formula sheet, Search, Add files). Every tab keeps its place.

@@ -25,7 +25,7 @@ You landed on the right call. A CSV fights this content at every turn: LaTeX is 
 
 ## 3. The frame language
 
-The spec is [docs/LANGUAGE.md](docs/LANGUAGE.md), now v0.2. The worked examples are `examples-private/ecen305-hw3.frame` and `examples-private/elen304-hw3.frame`. In short:
+The spec is [docs/LANGUAGE.md](docs/LANGUAGE.md), now v0.3. The worked examples are `examples-private/ecen305-hw3.frame` and `examples-private/elen304-hw3.frame`. In short:
 
 - A file is a list of blocks. Each starts with an `@type` line, then come `key: value` properties, then the body.
 - Bodies are text with `$math$`, light Markdown, `{{F2}}` refs (outside math only) and `{= expr}` live values.
@@ -127,8 +127,8 @@ Published as `BraxtonStryker/TrainFrame` at `https://braxtonstryker.github.io/Tr
 Each step ends with something you can open and react to. ★ marks the places your review matters most.
 
 1. ✓ **Language spec.** v0.1 written and four real problems converted; v0.2 adds semicolons and `folder:`.
-2. **Working shell.** `git init`; the shell copied from RunDown (tokens, title bar, app switcher, settings, theme, font, KaTeX, service worker); the layout: class tabs, section tabs, folder directory, Add files, the problem rail, the notes box and the calculator window. Until steps 3 and 4 land, an opened file shows its source.
-3. **Parser and checker.** Text becomes a tree of blocks with line numbers. Unknown refs, missing answers, bad expressions and failed `check:` lines are reported. The safe expression parser lands here, with complex numbers and the adaptive integral.
+2. ✓ **Working shell.** `git init`; the shell copied from RunDown (tokens, title bar, app switcher, settings, theme, font, KaTeX, service worker); the layout: class tabs, section tabs, folder directory, Add files, the problem rail, the notes box and the calculator window. Until steps 3 and 4 land, an opened file shows its source.
+3. ✓ **Parser and checker.** Text becomes a tree of blocks with line numbers. Unknown refs, missing answers, bad expressions and failed `check:` lines are reported. The safe expression parser lands here, with complex numbers and the adaptive integral.
 4. **Renderer.** The title block, the rail with progress, the formula bank (group and problem chips, "Used in"), problems → parts → steppers, ref peeks (inline on desktop, a bottom sheet on phones), answers, explain rubrics, notes and callouts, and the checklist. Progress is saved per file.
 5. **Visuals.** `@plot` first, since it covers most of both walkthroughs. Then `@stem`, `@table` and `@calc`, then `@phasor`.
 6. **Hub.** The Formula sheet and Search tabs, the load report with Copy for AI, export as `.frame` and as standalone HTML, and Download for offline.
@@ -160,7 +160,7 @@ Settled on 2026-11-02:
 2. **Color:** teal.
 3. **Real walkthroughs stay private.** They live in the gitignored `examples-private/`, and an invented demo ships instead. (My default, since you didn't say otherwise. Tell me if you want them public.)
 4. **Files are always drop-in.** No hosted library.
-5. **Syntax:** semicolons between the parts of a visual line, commas within lists, and IDs in braces on header lines (`@formula {F1} Title`).
+5. **Syntax:** semicolons between the parts of a visual line, commas within lists, and IDs in braces on header lines (`@formula {F1} Title`), required since v0.3.
 6. **Class sections:** Assignments (folders), Formula sheet, Search, Add files. Open classes are tabs next to Library, with the class's open files as tabs above the sections; every tab remembers its place. Classes can be renamed, archived and deleted.
 7. **Folders** come from the file's `folder:` line, and you can move files in the app.
 8. **Notes:** one box per assignment.

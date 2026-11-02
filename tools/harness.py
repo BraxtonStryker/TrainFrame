@@ -1,9 +1,10 @@
-"""v0.1 - drives TrainFrame in headless Chrome over the DevTools protocol (stdlib only) and checks the shell.
+"""v0.1 - drives TrainFrame in headless Chrome over the DevTools protocol (stdlib only) and checks the shell and the frame language.
 
 Usage (from the repo root):  python -I tools/harness.py [--keep] [--shots DIR]
 
 Serves the repo on a local port, starts headless Chrome with a fresh profile, and checks adding files, class and file
-tabs, folders, moving files, the class editor, an open file's rail and notes, the calculator window, settings and persistence across a reload.
+tabs, folders, moving files, the class editor, an open file's rail and notes, the expression engine, the parser and checker
+(on the demo, on examples-private/ when it's there, and on a broken file), the load report, the calculator window, settings and persistence across a reload.
 Exit 0 when every check passes. --shots saves screenshots. The DevTools code is RunDown's (from QuizQrusher's cdp_shot.py).
 """
 import base64, functools, http.server, json, os, shutil, socket, struct, subprocess, sys, tempfile, threading, time, urllib.request
@@ -150,6 +151,7 @@ def check(name, cond, detail=""):
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # messages use typographic quotes and minus signs
     keep = "--keep" in sys.argv
     shots = sys.argv[sys.argv.index("--shots") + 1] if "--shots" in sys.argv else None
     if shots:
@@ -240,14 +242,15 @@ def run(p, shots):
 
     print("File tabs")
     p.click_el("#sec_assignments .fcard .open")
-    check("opening a file adds a tab above the class's sections", J(FTABS) == ["Second file"] and J("__tf.cur") == "second", (J(FTABS), J("__tf.cur")))
-    check("no section is selected while a file shows", J("document.querySelectorAll('#secTabs [aria-selected=true]').length") == 0)
+    check("opening a file adds a tab to the file strip", J(FTABS) == ["Second file"] and J("__tf.cur") == "second", (J(FTABS), J("__tf.cur")))
+    check("the section bar shows only on a class's directory", J("document.getElementById('libhead').classList.contains('hidden')"))
     p.click_el("#clsTabs [data-cpick='Demo']")
+    check("a class tab goes to that class's directory", J("__tf.cur") is None and not J("document.getElementById('libhead').classList.contains('hidden')"))
     p.click_el("#sec_assignments .folder[data-go='Examples']")
     p.click_el("#sec_assignments .fcard .open")
-    check("each class keeps its own open files", J(FTABS) == ["A Tour of TrainFrame"], J(FTABS))
+    check("the strip shows open files from every class", J(FTABS) == ["Second file", "A Tour of TrainFrame"], J(FTABS))
     check("the rail has Formulas, then P1 and P2", J("Array.from(document.querySelectorAll('#rail a .rn')).map(function(e){ return e.textContent; })") == ["Fx", "P1", "P2"])
-    check("the path line names the class and folder", J("document.querySelector('.fpath .crumbs').textContent") == "Demo›Examples", J("document.querySelector('.fpath .crumbs').textContent"))
+    check("the path line names the class and folder", J("document.querySelector('.fpath .crumbs').textContent") == "Demo\u203aExamples", J("document.querySelector('.fpath .crumbs').textContent"))
     p.click_el("#rail a[data-p=P2]")
     for _ in range(30):   # let the smooth scroll settle
         y0 = J("Math.round(window.scrollY)")
@@ -255,31 +258,28 @@ def run(p, shots):
         if J("Math.round(window.scrollY)") == y0:
             break
     check("clicking P2 in the rail scrolls there and highlights it", J("__tf.curProblem") == "P2" and y0 > 300, (J("__tf.curProblem"), y0))
-    p.click_el("#clsTabs [data-cpick='ECEN 305']")
-    check("the other class shows its own file", J("__tf.cur") == "second")
-    p.click_el("#clsTabs [data-cpick='Demo']")
-    check("switching back returns to the same scroll spot", abs(J("Math.round(window.scrollY)") - y0) <= 2 and J("__tf.curProblem") == "P2", (J("Math.round(window.scrollY)"), y0))
-    p.click_el("#secTabs [data-sec=assignments]")
-    check("a section tab shows the section and keeps the file tab", J("__tf.cur") is None and J(FTABS) == ["A Tour of TrainFrame"])
+    p.click_el("#fileTabs [data-fpick=second]")
+    check("a file tab from another class switches class too", J("__tf.cur") == "second" and S() == ["class", "ECEN 305"], (J("__tf.cur"), S()))
     p.click_el("#fileTabs [data-fpick=demo]")
-    check("the file tab brings the file back where it was", abs(J("Math.round(window.scrollY)") - y0) <= 2, (J("Math.round(window.scrollY)"), y0))
+    check("switching back returns to the same scroll spot", abs(J("Math.round(window.scrollY)") - y0) <= 2 and J("__tf.curProblem") == "P2", (J("Math.round(window.scrollY)"), y0))
+    p.click_el("#fxToggle")
+    check("the formula tab opens the open file's formula bank", J("document.querySelectorAll('#fxList .fxcard').length") == 4)
+    p.click_el("#fxClose")
     if shots:
         p.shot(os.path.join(shots, "tabs.png"))
 
     print("Notes")
-    check("the notes tab shows on an open file", J("!document.getElementById('noteDock').classList.contains('hidden')"))
+    check("the notes tab shows on an open file", J("!document.getElementById('noteToggle').classList.contains('hidden')"))
     p.click_el("#noteToggle")
     check("the notes box opens", J("!document.getElementById('notePanel').classList.contains('hidden')"))
     p.click_el("#noteHeading")
     p.type("Tau is RC.")
     time.sleep(0.7)
-    check("Insert heading adds the problem you're on", J("document.getElementById('noteText').value") == "## P2 · RC charging\nTau is RC.", repr(J("document.getElementById('noteText').value")))
-    check("notes are saved", J("__tf.notes.demo && __tf.notes.demo.text") == "## P2 · RC charging\nTau is RC.")
-    p.click_el("#clsTabs [data-cpick='ECEN 305']")
+    check("Insert heading adds the problem you're on", J("document.getElementById('noteText').value") == "## P2 \u00b7 RC charging\nTau is RC.", repr(J("document.getElementById('noteText').value")))
+    check("notes are saved", J("__tf.notes.demo && __tf.notes.demo.text") == "## P2 \u00b7 RC charging\nTau is RC.")
+    p.click_el("#fileTabs [data-fpick=second]")
     check("another file has its own (empty) notes", J("document.getElementById('noteText').value") == "")
-    p.click_el("#clsTabs [data-cpick='Demo']")
-    if shots:
-        p.shot(os.path.join(shots, "notes.png"))
+    p.click_el("#fileTabs [data-fpick=demo]")
 
     print("Persistence")
     J("__tf.flush()")
@@ -289,21 +289,21 @@ def run(p, shots):
     time.sleep(0.3)
     check("the class tabs come back", J(TABS) == ["Demo", "ECEN 305"] and S() == ["class", "Demo"], (J(TABS), S()))
     check("the open file comes back at its scroll spot", J("__tf.cur") == "demo" and abs(J("Math.round(window.scrollY)") - y0) <= 2, (J("__tf.cur"), J("Math.round(window.scrollY)"), y0))
-    check("notes survive a reload", J("__tf.notes.demo && __tf.notes.demo.text") == "## P2 · RC charging\nTau is RC.")
+    check("notes survive a reload", J("__tf.notes.demo && __tf.notes.demo.text") == "## P2 \u00b7 RC charging\nTau is RC.")
 
     print("Closing tabs")
     p.click_el("#fileTabs [data-fclose=demo]")
-    check("closing the only file tab shows the class's section", J(FTABS) == [] and J("__tf.cur") is None and J("document.getElementById('fstrip').classList.contains('hidden')"))
-    p.click_el("#clsTabs [data-cclose='Demo']")
-    check("closing a class tab moves to its neighbor", J(TABS) == ["ECEN 305"] and S() == ["class", "ECEN 305"], (J(TABS), S()))
+    check("closing the showing file moves to the next file tab", J(FTABS) == ["Second file"] and J("__tf.cur") == "second", (J(FTABS), J("__tf.cur")))
+    p.click_el("#fileTabs [data-fclose=second]")
+    check("closing the last file tab shows the class directory", J(FTABS) == [] and J("__tf.cur") is None and J("document.getElementById('fstrip').classList.contains('hidden')"))
     p.click_el("#clsTabs [data-cclose='ECEN 305']")
+    check("closing a class tab moves to its neighbor", J(TABS) == ["Demo"] and S() == ["class", "Demo"], (J(TABS), S()))
+    p.click_el("#clsTabs [data-cclose='Demo']")
     check("closing the last class tab shows the Library", J(TABS) == [] and J("__tf.screen") == "home")
     check("the classes stay in the Library", J(CARDS) == ["Demo", "ECEN 305"])
 
     print("Folders and moving")
     p.click_el("#homeGrid [data-copen='ECEN 305']")
-    check("a reopened class keeps its file tabs", J(FTABS) == ["Second file"] and J("__tf.cur") == "second", (J(FTABS), J("__tf.cur")))
-    p.click_el("#secTabs [data-sec=assignments]")
     J("__tf.goFolder('ECEN 305', '')")
     p.click_el("[data-act=newfolder]")
     p.type("Homework")
@@ -375,12 +375,98 @@ def run(p, shots):
     STORAGE = "Array.from(document.querySelectorAll('#settingsBody .set-row')).filter(function(r){ return r.querySelector('.set-label').textContent === 'Storage'; })[0].querySelector('.set-desc').textContent"
     check("the storage row counts files and notes", J(STORAGE).startswith("1 file and 1 notes box"), J(STORAGE))
 
+    print("Expressions")
+    E = lambda src, vars=None: J("__tf.fmtNum(__tf.evalExpr(%s, %s))" % (json.dumps(src), json.dumps(vars or {})))
+    EERR = lambda src: J("(function(){ try { __tf.evalExpr(%s); return 'no error'; } catch (e){ return e.message; } })()" % json.dumps(src))
+    for src, want, vars in [("-2^2", "-4", None), ("2^3^2", "512", None), ("2pi", "6.28319", None), ("3(1+1)", "6", None), ("2x^2", "18", {"x": 3}),
+                            ("0 <= 1 <= 2", "1", None), ("1 < 2 < 1.5", "0", None), ("if(0, 1, 0, 2, 3)", "3", None), ("-7 % 3", "2", None),
+                            ("exp(-j*pi/2)", "0 − 1j", None), ("sqrt(-4)", "0 + 2j", None), ("abs(3 + 4j)", "5", None), ("(1 + 2j) * (3 - j)", "5 + 5j", None),
+                            ("sum(n = 1 to 4, n)", "10", None), ("sum(n = 1 to 9 step 2, 1)", "5", None), ("product(k = 1 to 5, k)", "120", None),
+                            ("integral(x = 0 to 1, x^2)", "0.333333", None), ("integral(t = -2 to 2, if(abs(t) <= 1, 1, 0)) / 4", "0.5", None),
+                            ("abs(integral(t = 0 to 2*pi, exp(j*t))) < 1e-9", "1", None), ("Q(1.96)", "0.0249979", None), ("Qinv(0.025)", "1.95996", None),
+                            ("fact(5) + choose(5, 2)", "130", None), ("clamp(5, 0, 2) + mod(-1, 4)", "5", None), ("1e-3 * 2e3", "2", None)]:
+        got = E(src, vars)
+        check("%s = %s" % (src, want), got == want, got)
+    for src, want in [("sin(1, 2)", "takes 1 value"), ("foo(1)", "no function called"), ("constructor", "isn’t defined"), ("__proto__ + 1", "isn’t defined"),
+                      ("toString(1)", "no function called"), ("1 +", "ends too soon"), ("2 3", "unexpected"), ("sum(n = 1 to 3 n)", "expected"), ("asin(j)", "real number")]:
+        got = EERR(src)
+        check("%s fails with “%s”" % (src, want), want in got, got)
+
+    print("Parser and checker")
+    PARSE = ("(async function(name){ var t = await fetch(name).then(function(r){ return r.ok ? r.text() : null; }); if (t == null) return null;"
+             " var d = __tf.parse(t); return { errors: d.errors, warnings: d.warnings, checks: d.checks.length, failed: d.checks.filter(function(c){ return !c.ok; }).length }; })")
+    for name, n in [("examples/demo.frame", 3), ("examples-private/ecen305-hw3.frame", 10), ("examples-private/elen304-hw3.frame", 11), ("examples-private/emf-ch5.frame", 42)]:
+        r = J(PARSE + "(%s)" % json.dumps(name))
+        if r is None:
+            print("  skip " + name + " (not in this copy)")
+            continue
+        check(name + " loads with no errors", not r["errors"], r["errors"])
+        check(name + ": all %d checks pass" % n, r["checks"] == n and r["failed"] == 0, (r["checks"], r["failed"]))
+        for w in r["warnings"]:
+            print("       warning line %d: %s" % (w["line"], w["msg"]))
+    check("a file that doesn't start with @frame isn't a frame file", J("__tf.parse('hello\\n@frame {x}') === null && !!__tf.parse('// note\\n\\n@frame {x}')"))
+    BAD = "\n".join([
+        "@frame {bad-file}", "class: Test", "",
+        "@formula {F1} One", "$$ x $$", "",
+        "@formula {F1} Again", "$$ y $$", "",
+        "@formla {F2} Typo", "text", "",
+        "@formula Valid PDF", "$$ z $$", "",
+        "@formula {F5} PDF of $f_{X}$", "$$ w $$", "",
+        "@problem {P1} Problem", "points: 3", "pionts: 4", "let f(x) = x^2 +", "let g(x) = h(x)", "",
+        "@part {a}", "Find it with {{F9}} and {{P1.z}}.", "$ unclosed", "",
+        "@step Work {{F1}}", "check: 1 + 1 = 3", "check: nothere = 1", "",
+        "@plot", "x: 0 to 1, ticks 0, 1", "curve x^2; colour 2", "curve zz", "slider b: 0 to 1; step 0.1", "dot (b, b^2); label \"{= nope}\"", "",
+        "@section Later", "", "@answer", "42"])
+    at = lambda text: BAD.split("\n").index(text) + 1
+    J("window.__bad = __tf.parse(%s), 1" % json.dumps(BAD))
+    errs = J("__bad.errors.map(function(e){ return e.line + ': ' + e.msg; })")
+    warns = J("__bad.warnings.map(function(e){ return e.line + ': ' + e.msg; })")
+    has = lambda rows, line, text: any(r.startswith("%d: " % line) and text in r for r in rows)
+    for line, text in [(at("@formula {F1} Again"), "already used on line 4"), (at("@formla {F2} Typo"), "Did you mean @formula?"),
+                       (at("let f(x) = x^2 +"), "ends too soon"), (at("let g(x) = h(x)"), "no function called “h”"),
+                       (at("Find it with {{F9}} and {{P1.z}}."), "{{F9}} doesn’t match"), (at("Find it with {{F9}} and {{P1.z}}."), "has no part z"),
+                       (at("$ unclosed"), "isn’t closed"), (at("check: 1 + 1 = 3"), "works out to 2, not 3"), (at("check: nothere = 1"), "“nothere” isn’t defined"),
+                       (at("x: 0 to 1, ticks 0, 1"), "separated with ;"), (at("curve x^2; colour 2"), "Did you mean color?"), (at("curve zz"), "“zz” isn’t defined here"),
+                       (at("dot (b, b^2); label \"{= nope}\""), "“nope” isn’t defined"), (at("@answer"), "belongs inside a @problem"),
+                       (at("@formula Valid PDF"), "Did you mean “@formula {F1} Valid PDF”?")]:
+        check("error on line %d: %s" % (line, text), has(errs, line, text), errs)
+    check("braces later in a title are title text", not any(r.startswith("%d: " % at("@formula {F5} PDF of $f_{X}$")) for r in errs) and
+          J("__bad.formulas.filter(function(f){ return f.id === 'F5'; })[0].title") == "PDF of $f_{X}$", errs)
+    BARE = "(function(){ var d = __tf.parse(%s); return d.id + ' | ' + (d.errors[0] || {}).msg; })()" % json.dumps("@frame demo2" + chr(10) + "title: X")
+    check("a bare ID is an error that suggests braces, and still works as the ID",
+          J(BARE) == "demo2 | @frame needs its ID in braces right after it. Did you mean “@frame {demo2}”?", J(BARE))
+    for line, text in [(1, "no title"), (at("pionts: 4"), "Did you mean points:?"), (at("@part {a}"), "has no @answer")]:
+        check("warning on line %d: %s" % (line, text), has(warns, line, text), warns)
+
+    print("Load report")
+    J("""(async function(){ var a = await __tf.importTexts([{ name: 'bad.frame', text: %s }]); __tf.afterImport(a); })()""" % json.dumps(BAD))
+    J("__tf.showScreen('home')")
+    check("the Add files report flags the errors", "errors" in J("document.querySelector('#addReport li.bad span').textContent"), J("document.getElementById('addReport').textContent"))
+    J("__tf.openFile('bad-file')")
+    time.sleep(0.2)
+    nrep = J("document.querySelectorAll('.lrep li').length")
+    check("an open file lists its errors and warnings", J("!!document.querySelector('.lrep.bad')") and nrep == J("__bad.errors.length + __bad.warnings.length"), nrep)
+    check("lines with errors are marked in the source", J("document.querySelectorAll('#srcView .l.le').length") >= 10)
+    if shots:
+        p.shot(os.path.join(shots, "report.png"))
+    p.click_el(".lrep li.e .ln")
+    first = J("__bad.errors[0].line")
+    check("a line link jumps to that line", J("document.getElementById('L%d').classList.contains('flash')" % first))
+    text = J("__tf.reportText('bad-file')")
+    check("Copy report for AI has every error with its line and source", ("line %d: " % first) in text and "Errors" in text and "@formla {F2} Typo" in text, text[:300])
+    J("__tf.openFile('demo')")
+    time.sleep(0.2)
+    check("a clean file says so", J("document.querySelector('.lrep.good') && document.querySelector('.lrep.good').textContent") == "Loaded clean.3 of 3 checks pass.",
+          J("document.querySelector('.lrep') && document.querySelector('.lrep').textContent"))
+    J("__tf.goFolder('Demo', 'Examples')")
+    check("its card shows the checks passing", J("document.querySelector('.fcard .lstat.good') && document.querySelector('.fcard .lstat.good').textContent") == "✓ 3 of 3 checks pass")
+
     print("Phone width")
     p.call("Emulation.setDeviceMetricsOverride", width=390, height=844, deviceScaleFactor=2, mobile=True)
     J("__tf.openFile('demo')")
     time.sleep(0.3)
     check("the rail becomes a sideways strip", J("getComputedStyle(document.getElementById('rail')).flexDirection") == "row")
-    UNDER = "(document.querySelector('.appbar').offsetHeight + document.getElementById('chead').offsetHeight) + 'px'"
+    UNDER = "(document.querySelector('.appbar').offsetHeight + document.getElementById('fstrip').offsetHeight + document.getElementById('chead').offsetHeight) + 'px'"
     check("the rail strip sits right under the sticky bars", J("getComputedStyle(document.getElementById('rail')).top") == J(UNDER),
           (J("getComputedStyle(document.getElementById('rail')).top"), J(UNDER)))
     check("the page doesn't scroll sideways", J("document.documentElement.scrollWidth <= window.innerWidth"), J("[document.documentElement.scrollWidth, window.innerWidth]"))

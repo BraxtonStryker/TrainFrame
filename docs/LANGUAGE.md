@@ -116,7 +116,7 @@ A line starting with `//` is a comment.
 | `\| a \| b \|` rows | A table (a header row, a `\|---\|---\|` row, then rows), as in GitHub Markdown |
 | `{{F2}}` | A formula or definition tag. Click it to open the formula right there. |
 | `{{P3}}`, `{{P3.b}}` | A link to a problem, or to one part of it |
-| `{= expr}`, `{= expr : 4}` | A live value: the expression's result to 3 decimals, or to as many as you say. Updates when sliders move. Works inside math too. |
+| `{= expr}`, `{= expr : 4}` | A live value: the expression's result to up to 3 decimals (trailing zeros dropped, so a whole number shows as one), or to exactly as many as you say. Updates when sliders move. Works inside math too. |
 
 **Refs are read only outside math.** LaTeX uses `{{` and `}}` all the time (`\frac{{a}}{b}`), so `{{F2}}` inside `$...$` is left alone as LaTeX.
 

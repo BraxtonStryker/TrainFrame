@@ -335,6 +335,35 @@
   .vis{border:1px dashed var(--line-2); border-radius:var(--radius-sm); padding:10px 14px; margin:10px 0; color:var(--muted); font-size:calc(14px * var(--fs))}
   .vis figcaption{color:var(--ink)}
   .vis p{margin:4px 0 0}
+  /* ---------- Visuals ---------- */
+  :root{--v1:var(--accent); --v2:#E8711A; --v3:#7C6FF0; --v4:#22A06B}
+  .vis.live{border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:12px 14px; overflow:hidden}
+  .views{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0}
+  .vctls{display:flex; flex-wrap:wrap; gap:8px 18px; margin:8px 0}
+  .vctl{display:flex; align-items:center; gap:8px; font-size:calc(14px * var(--fs))}
+  .vctl input[type=range]{width:min(260px, 46vw); accent-color:var(--accent)}
+  .vctl output{font-family:var(--font-mono); font-size:calc(13px * var(--fs)); min-width:3.5em}
+  .vctl.num input{width:9em; font-family:var(--font-mono); font-size:calc(14px * var(--fs)); color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:5px 8px}
+  .vctl.tog input{accent-color:var(--accent)}
+  .vpanels.side{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
+  @media (max-width:900px){ .vpanels.side{grid-template-columns:1fr} }
+  .vpanels:not(.side) .vpanel + .vpanel{margin-top:12px}
+  .vsvg{display:block; max-width:100%; height:auto}
+  .vsvg text{fill:var(--muted); font-size:12px; font-family:var(--font-body)}
+  .vsvg .grid{stroke:var(--line); stroke-width:1; fill:none}
+  .vsvg circle.grid{stroke:var(--line-2)}
+  .vsvg .axis{stroke:var(--line-2); stroke-width:1.4}
+  .vxl{text-align:center; font-size:calc(13px * var(--fs)); color:var(--muted)}
+  .vyl{font-size:calc(13px * var(--fs)); color:var(--muted); margin-bottom:2px}
+  .vleg{display:flex; flex-wrap:wrap; gap:6px 16px; font-size:calc(13px * var(--fs)); margin-top:6px}
+  .vleg span{display:inline-flex; align-items:center; gap:6px}
+  .vleg i{display:inline-block; width:22px}
+  .vleg i.dotsw{width:9px; height:9px; border-radius:50%}
+  .readout{font-family:var(--font-mono); font-size:calc(13px * var(--fs)); white-space:pre-wrap; background:var(--code-bg); border:1px solid var(--line); border-radius:8px; padding:6px 10px; margin-top:8px}
+  .vcap p{color:var(--ink); font-size:calc(14.5px * var(--fs))}
+  .vout{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-top:1px solid var(--line); font-size:calc(14.5px * var(--fs))}
+  .vout b{font-family:var(--font-mono)}
+  .vtbl td{font-family:var(--font-mono); font-size:calc(13px * var(--fs))}
   .tbl{overflow-x:auto}
   .tbl table{border-collapse:collapse; margin:8px 0}
   .tbl th, .tbl td{border:1px solid var(--line); padding:4px 10px; text-align:left}
@@ -634,6 +663,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     <p><button class="btn sm" id="aiCopyHelp" type="button">Copy AI prompt</button></p>
     <h2>What's new</h2>
     <dl class="versions">
+      <dt>0.5.0 (2026-11-02)</dt>
+      <dd>Visuals are live: plots, stem plots, phasor diagrams, tables and calculators, with sliders, toggles and view buttons (like Part 1, Part 2, Explore). Captions and readouts update as you move a slider.</dd>
       <dt>0.4.0 (2026-11-02)</dt>
       <dd><b>Copy AI prompt</b> (in Add files and here in Help) copies instructions and a syntax guide to paste into an AI with an assignment. Load-report items can be dismissed, per file. The warning for answers without a check is off unless you turn it on in Settings.</dd>
       <dt>0.3.0 (2026-11-02)</dt>
@@ -752,7 +783,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 (function(){
   "use strict";
 
-  var APP_VERSION = "0.4.0";
+  var APP_VERSION = "0.5.0";
   var NS = "trainFrame:";   // every GitHub Pages project of this user shares one origin, so namespace every key
   var UNSORTED = "Unsorted";   // the class tab for files with no class: line
   var el = function(id){ return document.getElementById(id); };
@@ -1404,6 +1435,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
         var kw = main.split(/\s+/)[0], rest = main.slice(kw.length).trim(), am = /^([A-Za-z_]\w*)\s*:\s*(.*)$/.exec(main);
         var it = { line: line, view: view, kw: kw, opts: [] };
         if (kw !== "slider" && kw !== "input" && am){ kw = it.kw = "axis"; it.axis = am[1] === "y" ? "y" : "x"; it.name = am[1]; rest = am[2]; }
+        it.rest = rest;   // the main part, which the renderer reads
         if (COMMON_LINES.indexOf(kw) < 0 && PANEL_LINES[panel.kind].indexOf(kw) < 0){
           var where = Object.keys(PANEL_LINES).filter(function(k){ return PANEL_LINES[k].indexOf(kw) >= 0; });
           if (where.length) err(line, q(kw === "axis" ? it.name + ":" : kw) + " lines go in a " + where.join(" or ") + " panel, not a " + panel.kind + ".");
@@ -2173,7 +2205,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     return '<code class="texsrc">' + esc(src) + '</code>';
   }
   function live(text, L){   // {= expr : d} becomes its value (until the visuals land, sliders aren't in play)
-    return text.replace(LIVE_RE, function(all, src, d){ try { return fmtNum(evaluate(parseExpr(src), L), d == null ? 3 : +d); } catch (e){ return "?"; } });
+    return text.replace(LIVE_RE, function(all, src, d){ try { return liveNum(evaluate(parseExpr(src), L), d); } catch (e){ return "?"; } });
   }
   function inline(t){   // math, code, refs and light Markdown inside one line of text
     var keep = [], put = function(h){ keep.push(h); return "\u0000" + (keep.length - 1) + "\u0000"; };
@@ -2237,10 +2269,284 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   function calloutHtml(A, L){
     return '<aside class="callout ' + A.type + '" id="L' + A.line + '"><b>' + (A.title ? inline(A.title) : A.type.charAt(0).toUpperCase() + A.type.slice(1)) + '</b>' + md(bodyOf(A), L) + '</aside>';
   }
+  /* ---------- Visuals: plots, stem plots, phasors, live tables and calculators, redrawn as sliders move ---------- */
+  // A figure keeps its variables (sliders, toggles, set, inputs) and its view. Lines with a view show only while it's picked.
+  var FIGS = {};   // figure line -> { B, L, vars, view, items } for the file showing
+  var exprCache = dict();
+  function px(src){ return exprCache[src] || (exprCache[src] = parseExpr(src)); }
+  function envOf(fig, extra){
+    var v = Object.create(null);
+    Object.keys(fig.vars).forEach(function(k){ v[k] = fig.vars[k]; });
+    if (extra) Object.keys(extra).forEach(function(k){ v[k] = extra[k]; });
+    return { v: v, L: fig.L, d: 0 };
+  }
+  function figNum(fig, src, extra){ try { return fix(ev(typeof src === "string" ? px(src) : src, envOf(fig, extra))); } catch (e){ return NaN; } }
+  function realNum(v){ v = fix(v); return isC(v) ? NaN : +v; }
+  function figFn(fig, src, name){   // src as a function of one variable; a let function's bare name works too
+    var node = px(src), env = envOf(fig);
+    if (node.t === "var" && node.n in fig.L && fig.L[node.n].params.length === 1 && !(node.n in env.v)) node = { t: "call", n: node.n, args: [{ t: "var", n: name }] };
+    return function(x){ env.v[name] = x; try { var r = fix(ev(node, env)); return isC(r) ? NaN : r; } catch (e){ return NaN; } };
+  }
+  function figText(fig, t, extra){ return t.replace(LIVE_RE, function(a, src, d){ var v = figNum(fig, src, extra); return (isC(v) || isFinite(v)) ? liveNum(v, d) : "?"; }); }
+  function liveNum(v, d){   // {= x} shows up to 3 decimals without trailing zeros (n=1, 0.5, 0.632); {= x : 3} shows exactly 3
+    var t = fmtNum(v, d == null ? 3 : +d);
+    return d == null ? t.replace(/(\.\d*?)0+(?!\d)/g, "$1").replace(/\.(?!\d)/g, "") : t;
+  }
+  function optOf(it, w){ for (var k = 0; k < it.opts.length; k++) if (it.opts[k].word === w) return it.opts[k].rest; return null; }
+  function strOpt(it, w){ var r = optOf(it, w), m = r && /^"([^"]*)"$/.exec(r); return m ? m[1] : null; }
+  function loopVals(fig, clause){   // "n = 1 to 9 [step 2]" or "t in 0, 1, 2" -> [name, values]
+    var m = /^([A-Za-z_]\w*)\s*(=|in)\s*(.+)$/.exec(clause || ""), vals = [];
+    if (!m) return [null, []];
+    if (m[2] === "in") splitTop(m[3], ",").forEach(function(e){ vals.push(realNum(figNum(fig, e))); });
+    else {
+      var r = /^(.+?)\s+to\s+(.+?)(?:\s+step\s+(.+))?$/.exec(m[3]);
+      if (r){ var lo = realNum(figNum(fig, r[1])), hi = realNum(figNum(fig, r[2])), st = r[3] ? realNum(figNum(fig, r[3])) : 1; if (st > 0) for (var c = 0; lo + c * st <= hi + 1e-9 && c < 2000; c++) vals.push(lo + c * st); }
+    }
+    return [m[1], vals];
+  }
+  function forEachOf(fig, it, fn){ var c = optOf(it, "for"); if (c == null) return fn(null); var lv = loopVals(fig, c); lv[1].forEach(function(v){ var e = {}; e[lv[0]] = v; fn(e); }); }
+  function shows(fig, it){ return it.view == null || it.view === fig.view; }
+  function sliderRange(fig, it){
+    var m = /^([A-Za-z_]\w*)\s*:\s*(.+?)\s+to\s+(.+)$/.exec(it.rest || ""), lo = m ? realNum(figNum(fig, m[2])) : 0, hi = m ? realNum(figNum(fig, m[3])) : 1;
+    var st = optOf(it, "step") != null ? realNum(figNum(fig, optOf(it, "step"))) : (hi - lo) / 100, start = optOf(it, "start") != null ? realNum(figNum(fig, optOf(it, "start"))) : lo;
+    return { lo: lo, hi: hi, step: st > 0 ? st : (hi - lo) / 100 || 0.01, start: start };
+  }
+  function initItem(fig, it){
+    if (it.kw === "set") it.opts.forEach(function(a){ if (a.expr) fig.vars[a.name] = realNum(figNum(fig, a.expr)); });
+    else if (it.kw === "slider") fig.vars[it.name] = sliderRange(fig, it).start;
+    else if (it.kw === "toggle") fig.vars[it.name] = 0;
+    else if (it.kw === "input") fig.vars[it.name] = optOf(it, "start") != null ? realNum(figNum(fig, optOf(it, "start"))) : 0;
+  }
+  function pickView(fig, name){ fig.view = name; fig.items.forEach(function(it){ if (it.view === name) initItem(fig, it); }); }
+  function viewHolds(fig, name){
+    return fig.view === name && fig.items.every(function(it){
+      return it.view !== name || it.kw !== "set" || it.opts.every(function(a){ return !a.expr || Math.abs(realNum(figNum(fig, a.expr)) - fig.vars[a.name]) < 1e-9; });
+    });
+  }
+  function makeFig(A){
+    var fig = { B: A, L: A.vis.L, vars: {}, view: null, items: [] };
+    A.vis.panels.forEach(function(p, pi){ p.items.forEach(function(it){ it.pi = pi; fig.items.push(it); }); });
+    fig.items.forEach(function(it){ if (it.view == null) initItem(fig, it); });
+    if (A.vis.views.length) pickView(fig, A.vis.views[0].name);
+    FIGS[A.line] = fig;
+    return fig;
+  }
   function visualHtml(A){
-    var kinds = A.vis.panels.map(function(p){ return VIS_NAMES[p.kind]; }).filter(function(k, i, a){ return a.indexOf(k) === i; });
-    return '<figure class="vis" id="L' + A.line + '"><figcaption><b>' + esc(kinds.join(" + ")) + '</b>' + (A.title ? ' · ' + inline(A.title) : "") + '</figcaption>' +
-      '<p>Interactive ' + esc(kinds.join(" and ").toLowerCase()) + (A.vis.views.length ? " with " + esc(A.vis.views.map(function(v){ return v.name; }).join(" / ")) + " views" : "") + '. Visuals are the next part of TrainFrame to be built.</p></figure>';
+    var fig = makeFig(A);
+    return '<figure class="vis live" id="L' + A.line + '" data-fig="' + A.line + '">' + figHtml(fig) + '</figure>';
+  }
+  function figHtml(fig){
+    var A = fig.B, vis = A.vis, h = A.title ? '<figcaption><b>' + inline(A.title) + '</b></figcaption>' : "";
+    if (vis.views.length) h += '<div class="views">' + vis.views.map(function(v){
+      var on = viewHolds(fig, v.name);
+      return '<button class="btn sm' + (on ? "" : " ghost") + '" type="button" data-view="' + esc(v.name) + '" aria-pressed="' + on + '">' + inline(v.name) + '</button>';
+    }).join("") + '</div>';
+    var ctl = fig.items.filter(function(it){ return shows(fig, it) && (it.kw === "slider" || it.kw === "toggle"); }).map(function(it){ return controlHtml(fig, it); }).join("");
+    if (ctl) h += '<div class="vctls">' + ctl + '</div>';
+    h += '<div class="vpanels' + (vis.layout === "side by side" && vis.panels.length > 1 ? " side" : "") + '">' + vis.panels.map(function(p, pi){
+      return '<div class="vpanel ' + p.kind + '" data-pi="' + pi + '">' + (p.kind === "calc" ? calcInputs(fig, pi) : "") + '<div class="vdyn">' + panelHtml(fig, pi) + '</div></div>';
+    }).join("") + '</div>';
+    return h + '<div class="vcap">' + capHtml(fig) + '</div>';
+  }
+  function decimalsFor(step){ return Math.max(0, Math.min(6, -Math.floor(Math.log10(step) + 1e-9))); }
+  function controlHtml(fig, it){
+    var lab = inline(figText(fig, strOpt(it, "label") || it.name));
+    if (it.kw === "toggle") return '<label class="vctl tog"><input type="checkbox" data-var="' + esc(it.name) + '"' + (fig.vars[it.name] ? " checked" : "") + '> <span>' + lab + '</span></label>';
+    var r = sliderRange(fig, it);
+    return '<label class="vctl"><span>' + lab + '</span><input type="range" min="' + r.lo + '" max="' + r.hi + '" step="' + r.step + '" value="' + fig.vars[it.name] + '" data-var="' + esc(it.name) + '" data-dec="' + decimalsFor(r.step) + '">' +
+      '<output>' + fig.vars[it.name].toFixed(decimalsFor(r.step)) + '</output></label>';
+  }
+  function capHtml(fig){
+    var caps = [], out = "";
+    fig.items.forEach(function(it){
+      if (!shows(fig, it)) return;
+      if (it.kw === "caption") caps.push(it.text);
+      else if (it.kw === "readout") out += '<div class="readout">' + inline(figText(fig, it.text)) + '</div>';
+    });
+    return out + (caps.length ? '<p>' + inline(figText(fig, caps.join(" "))) + '</p>' : "");
+  }
+  function panelHtml(fig, pi){
+    var kind = fig.B.vis.panels[pi].kind;
+    try { return kind === "phasor" ? phasorHtml(fig, pi) : kind === "table" ? tableHtml(fig, pi) : kind === "calc" ? calcOutputs(fig, pi) : plotHtml(fig, pi); }
+    catch (e){ return '<p class="muted">This ' + esc(VIS_NAMES[kind].toLowerCase()) + ' couldn’t be drawn: ' + esc(e.message) + '</p>'; }
+  }
+  function panelItems(fig, pi){ return fig.items.filter(function(it){ return it.pi === pi && shows(fig, it); }); }
+  function colorOf(it, k){ var c = optOf(it, "color"); return "var(--v" + (c ? +c : k || 1) + ")"; }
+  function strokeStyle(it){
+    var w = optOf(it, "width"), dash = optOf(it, "dashed") != null ? "6 5" : optOf(it, "dotted") != null ? "1.5 4" : "";
+    return ' stroke-width="' + (w ? +w : 2.4) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + (optOf(it, "muted") != null ? ' opacity=".5"' : "");
+  }
+  function numLabel(v){ var s = String(Number(v.toPrecision(4))); return s.charAt(0) === "-" ? "−" + s.slice(1) : s; }
+  function piLabel(v){
+    if (Math.abs(v) < 1e-9) return "0";
+    var r = v / Math.PI;
+    for (var d = 1; d <= 12; d++){
+      var n = Math.round(r * d);
+      if (Math.abs(r * d - n) < 1e-6){
+        var sign = n < 0 ? "−" : "", a = Math.abs(n);
+        return sign + (a === 1 ? "" : a) + "π" + (d === 1 ? "" : "/" + d);
+      }
+    }
+    return numLabel(v);
+  }
+  function niceStep(span){ var p = Math.pow(10, Math.floor(Math.log10(span / 6))), m = span / 6 / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; }
+  function ticksOf(fig, it, lo, hi){   // [[value, label]]
+    var t = it ? optOf(it, "ticks") : null, out = [], every = t && /^every\s+(.+)$/.exec(t);
+    if (t != null && !every) return splitTop(t, ",").map(function(e){ var m = /^(.+?)(?:\s+as\s+"([^"]*)")?$/.exec(e), v = realNum(figNum(fig, m[1])); return [v, m[2] != null ? m[2] : numLabel(v)]; });
+    var s = every ? realNum(figNum(fig, every[1])) : niceStep(hi - lo), isPi = every && /pi/.test(every[1]);
+    if (!(s > 0)) return out;
+    for (var k = Math.ceil(lo / s - 1e-9); k <= Math.floor(hi / s + 1e-9) && out.length < 200; k++) out.push([k * s, isPi ? piLabel(k * s) : numLabel(k * s)]);
+    return out;
+  }
+  function rangeOf(fig, it){ var m = /^(.+?)\s+to\s+(.+)$/.exec(it.rest || ""); return m ? [realNum(figNum(fig, m[1])), realNum(figNum(fig, m[2]))] : [NaN, NaN]; }
+  function svgSize(fig, square){
+    var box = el("frameMain"), w = Math.max(300, Math.min(760, (box && box.clientWidth) || 640));
+    if (fig.B.vis.layout === "side by side" && fig.B.vis.panels.length > 1 && window.innerWidth > 900) w = Math.max(300, w / 2 - 12);
+    return square ? [Math.min(w, 340), Math.min(w, 340)] : [w, Math.round(Math.max(200, Math.min(320, w * 0.46)))];
+  }
+  function plotHtml(fig, pi){
+    var its = panelItems(fig, pi), isStem = fig.B.vis.panels[pi].kind === "stem";
+    var ax = its.filter(function(it){ return it.kw === "axis" && it.axis === "x"; })[0], ay = its.filter(function(it){ return it.kw === "axis" && it.axis === "y"; })[0];
+    var xv = ax ? ax.name : "x", xr = ax ? rangeOf(fig, ax) : [-1, 1];
+    if (!(xr[1] > xr[0])) throw new Error("its horizontal axis needs a range like " + xv + ": -2 to 2");
+    // values every drawing line reaches, for an automatic vertical axis
+    var curves = its.filter(function(it){ return it.kw === "curve"; }), ys = [];
+    curves.forEach(function(it){ var f = figFn(fig, it.rest, xv); for (var k = 0; k <= 60; k++){ var y = f(xr[0] + (xr[1] - xr[0]) * k / 60); if (isFinite(y)) ys.push(y); } });
+    var pts = [];   // [item, x, y, extra] for dots and stems
+    its.forEach(function(it){
+      if (it.kw !== "dot" && it.kw !== "stem") return;
+      var m = /^\((.*)\)$/.exec(it.rest || ""), xy = m ? splitTop(m[1], ",") : [];
+      if (xy.length === 2) forEachOf(fig, it, function(e){ var x = realNum(figNum(fig, xy[0], e)), y = realNum(figNum(fig, xy[1], e)); if (isFinite(x) && isFinite(y)){ pts.push([it, x, y, e]); ys.push(y); } });
+    });
+    var yr = ay ? rangeOf(fig, ay) : null;
+    if (!yr || !(yr[1] > yr[0])){
+      var lo = Math.min.apply(null, ys.concat(isStem ? [0] : [])), hi = Math.max.apply(null, ys.concat(isStem ? [0] : []));
+      if (!isFinite(lo) || !isFinite(hi)){ lo = -1; hi = 1; }
+      if (hi - lo < 1e-9){ lo -= 1; hi += 1; }
+      var pad = (hi - lo) * 0.08; yr = [lo - pad, hi + pad];
+    }
+    var size = svgSize(fig), W = size[0], H = size[1], L0 = 46, R0 = 14, T0 = 12, B0 = 26;
+    var X = function(x){ return L0 + (x - xr[0]) / (xr[1] - xr[0]) * (W - L0 - R0); }, Y = function(y){ return Math.max(-1e4, Math.min(1e4, H - B0 - (y - yr[0]) / (yr[1] - yr[0]) * (H - T0 - B0))); };
+    var cid = "clip" + fig.B.line + "_" + pi, f2 = function(n){ return n.toFixed(1); };
+    var g = '<defs><clipPath id="' + cid + '"><rect x="' + L0 + '" y="' + T0 + '" width="' + (W - L0 - R0) + '" height="' + (H - T0 - B0) + '"/></clipPath></defs>';
+    // grid, axes and ticks
+    var y0 = Math.min(Math.max(0, yr[0]), yr[1]), x0 = Math.min(Math.max(0, xr[0]), xr[1]);
+    ticksOf(fig, ax, xr[0], xr[1]).forEach(function(t){ if (t[0] < xr[0] - 1e-9 || t[0] > xr[1] + 1e-9) return; g += '<line class="grid" x1="' + f2(X(t[0])) + '" x2="' + f2(X(t[0])) + '" y1="' + T0 + '" y2="' + (H - B0) + '"/><text x="' + f2(X(t[0])) + '" y="' + (H - B0 + 16) + '" text-anchor="middle">' + esc(t[1]) + '</text>'; });
+    ticksOf(fig, ay, yr[0], yr[1]).forEach(function(t){ if (t[0] < yr[0] - 1e-9 || t[0] > yr[1] + 1e-9) return; g += '<line class="grid" x1="' + L0 + '" x2="' + (W - R0) + '" y1="' + f2(Y(t[0])) + '" y2="' + f2(Y(t[0])) + '"/><text x="' + (L0 - 6) + '" y="' + f2(Y(t[0]) + 4) + '" text-anchor="end">' + esc(t[1]) + '</text>'; });
+    g += '<line class="axis" x1="' + L0 + '" x2="' + (W - R0) + '" y1="' + f2(Y(y0)) + '" y2="' + f2(Y(y0)) + '"/><line class="axis" x1="' + f2(X(x0)) + '" x2="' + f2(X(x0)) + '" y1="' + T0 + '" y2="' + (H - B0) + '"/>';
+    var body = "", top = "", legend = [], seen = dict();
+    var addLegend = function(it, swatch){ var t = strOpt(it, "legend"); if (t != null && !seen[t]){ seen[t] = 1; legend.push([swatch, t]); } };
+    its.forEach(function(it){
+      if (it.kw === "shade"){
+        var m = /^(.+?)\s+from\s+(.+?)\s+to\s+(.+)$/.exec(it.rest || "");
+        if (!m) return;
+        var f = figFn(fig, m[1], xv), a = Math.max(xr[0], realNum(figNum(fig, m[2]))), b = Math.min(xr[1], realNum(figNum(fig, m[3])));
+        if (!(b > a)) return;
+        var d = "M" + f2(X(a)) + " " + f2(Y(y0));
+        for (var k = 0; k <= 160; k++){ var x = a + (b - a) * k / 160, y = f(x); if (isFinite(y)) d += "L" + f2(X(x)) + " " + f2(Y(y)); }
+        body += '<path d="' + d + "L" + f2(X(b)) + " " + f2(Y(y0)) + 'Z" style="fill:' + colorOf(it) + '" fill-opacity=".22" stroke="none"/>';
+      }
+    });
+    curves.forEach(function(it){
+      var f = figFn(fig, it.rest, xv), d = "", prev = null, N = 520, span = yr[1] - yr[0];
+      for (var k = 0; k <= N; k++){
+        var x = xr[0] + (xr[1] - xr[0]) * k / N, y = f(x);
+        if (!isFinite(y)){ prev = null; continue; }
+        if (prev && Math.abs(y - prev[1]) > span * 0.25){   // a jump: find where, and draw it straight up or down
+          var a = prev[0], b = x, ya = prev[1], yb = y;
+          for (var q = 0; q < 30; q++){ var mx = (a + b) / 2, ym = f(mx); if (!isFinite(ym)) break; if (Math.abs(ym - ya) < Math.abs(ym - yb)){ a = mx; ya = ym; } else { b = mx; yb = ym; } }
+          d += "L" + f2(X(a)) + " " + f2(Y(ya)) + "L" + f2(X(a)) + " " + f2(Y(yb));
+        }
+        d += (prev ? "L" : "M") + f2(X(x)) + " " + f2(Y(y)); prev = [x, y];
+      }
+      body += '<path d="' + d + '" fill="none" style="stroke:' + colorOf(it) + '"' + strokeStyle(it) + ' stroke-linejoin="round"/>';
+      addLegend(it, '<i style="border-top:3px ' + (optOf(it, "dashed") != null ? "dashed" : optOf(it, "dotted") != null ? "dotted" : "solid") + ' ' + colorOf(it) + '"></i>');
+      var lab = strOpt(it, "label");
+      if (lab != null && prev) top += '<text x="' + f2(X(prev[0]) - 4) + '" y="' + f2(Y(prev[1]) - 8) + '" text-anchor="end" style="fill:' + colorOf(it) + '">' + esc(figText(fig, lab).replace(/\$/g, "")) + '</text>';
+    });
+    its.forEach(function(it){
+      if (it.kw !== "mark") return;
+      var m = /^([xy])\s*=\s*(.+)$/.exec(it.rest || ""), v = m ? realNum(figNum(fig, m[2])) : NaN, lab = strOpt(it, "label");
+      if (!isFinite(v)) return;
+      var dash = optOf(it, "dotted") != null ? "1.5 4" : "6 5";
+      if (m[1] === "x") body += '<line x1="' + f2(X(v)) + '" x2="' + f2(X(v)) + '" y1="' + T0 + '" y2="' + (H - B0) + '" style="stroke:' + colorOf(it, 2) + '" stroke-width="1.6" stroke-dasharray="' + dash + '"/>' +
+        (lab != null ? '<text x="' + f2(X(v) + 5) + '" y="' + (optOf(it, "below") != null ? H - B0 - 6 : T0 + 12) + '" style="fill:' + colorOf(it, 2) + '">' + esc(figText(fig, lab).replace(/\$/g, "")) + '</text>' : "");
+      else body += '<line x1="' + L0 + '" x2="' + (W - R0) + '" y1="' + f2(Y(v)) + '" y2="' + f2(Y(v)) + '" style="stroke:' + colorOf(it, 2) + '" stroke-width="1.6" stroke-dasharray="' + dash + '"/>' +
+        (lab != null ? '<text x="' + (W - R0 - 4) + '" y="' + f2(Y(v) + (optOf(it, "below") != null ? 15 : -6)) + '" text-anchor="end" style="fill:' + colorOf(it, 2) + '">' + esc(figText(fig, lab).replace(/\$/g, "")) + '</text>' : "");
+      addLegend(it, '<i style="border-top:2px dashed ' + colorOf(it, 2) + '"></i>');
+    });
+    pts.forEach(function(p){
+      var it = p[0], cx = f2(X(p[1])), cy = f2(Y(p[2])), col = colorOf(it, it.kw === "dot" ? 2 : 1);
+      if (it.kw === "stem"){
+        var cond = optOf(it, "filled"), filled = optOf(it, "hollow") == null && (cond == null || truthyNum(figNum(fig, cond.replace(/^if\s+/, ""), p[3])));
+        body += '<line x1="' + cx + '" x2="' + cx + '" y1="' + f2(Y(y0)) + '" y2="' + cy + '" style="stroke:' + col + '" stroke-width="2"/><circle cx="' + cx + '" cy="' + cy + '" r="4.5" style="stroke:' + col + ';fill:' + (filled ? col : "var(--surface)") + '" stroke-width="2"/>';
+      } else top += '<circle cx="' + cx + '" cy="' + cy + '" r="4.5" style="fill:' + col + '" stroke="var(--surface)" stroke-width="1.5"/>';
+      var lab = strOpt(it, "label");
+      if (lab != null) top += '<text x="' + f2(X(p[1]) + 7) + '" y="' + f2(Y(p[2]) + (optOf(it, "below") != null ? 17 : -8)) + '" style="fill:' + col + '">' + esc(figText(fig, lab, p[3]).replace(/\$/g, "")) + '</text>';
+      addLegend(it, '<i class="dotsw" style="background:' + col + '"></i>');
+    });
+    var svg = '<svg class="vsvg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img">' + g + '<g clip-path="url(#' + cid + ')">' + body + '</g>' + top + '</svg>';
+    var xl = ax && strOpt(ax, "label"), yl = ay && strOpt(ay, "label");
+    return (yl != null ? '<div class="vyl">' + inline(figText(fig, yl)) + '</div>' : "") + svg + (xl != null ? '<div class="vxl">' + inline(figText(fig, xl)) + '</div>' : "") +
+      (legend.length ? '<div class="vleg">' + legend.map(function(l){ return '<span>' + l[0] + inline(figText(fig, l[1])) + '</span>'; }).join("") + '</div>' : "");
+  }
+  function truthyNum(v){ v = realNum(v); return isFinite(v) && v !== 0; }
+  function phasorHtml(fig, pi){
+    var its = panelItems(fig, pi), rad = its.filter(function(it){ return it.kw === "radius"; })[0], R = rad ? realNum(figNum(fig, rad.rest)) : 1;
+    if (!(R > 0)) R = 1;
+    var size = svgSize(fig, true), S = size[0], c = S / 2, sc = (S / 2 - 62) / R,   // room for labels past the circle
+      f2 = function(n){ return n.toFixed(1); };
+    var g = '<line class="axis" x1="12" x2="' + (S - 12) + '" y1="' + c + '" y2="' + c + '"/><line class="axis" x1="' + c + '" x2="' + c + '" y1="12" y2="' + (S - 12) + '"/>' +
+      '<circle cx="' + c + '" cy="' + c + '" r="' + f2(sc) + '" fill="none" class="grid" stroke-dasharray="4 4"/><text x="' + (S - 14) + '" y="' + (c - 6) + '" text-anchor="end">Re</text><text x="' + (c + 6) + '" y="22">Im</text>';
+    var labels = [], k = 0;
+    its.forEach(function(it){
+      if (it.kw !== "vector") return;
+      forEachOf(fig, it, function(e){
+        var z = fix(figNum(fig, it.rest, e)), x = reOf(z), y = imOf(z);
+        if (!isFinite(x) || !isFinite(y)) return;
+        var col = optOf(it, "one") != null ? "var(--v" + (k % 4 + 1) + ")" : colorOf(it), tx = c + x * sc, ty = c - y * sc, len = Math.hypot(tx - c, ty - c);
+        k++;
+        if (len > 1){
+          var ux = (tx - c) / len, uy = (ty - c) / len, bx = tx - ux * 11, by = ty - uy * 11;
+          g += '<line x1="' + c + '" y1="' + c + '" x2="' + f2(bx) + '" y2="' + f2(by) + '" style="stroke:' + col + '" stroke-width="2.6"/>' +
+            '<polygon points="' + f2(tx) + "," + f2(ty) + " " + f2(bx - uy * 5) + "," + f2(by + ux * 5) + " " + f2(bx + uy * 5) + "," + f2(by - ux * 5) + '" style="fill:' + col + '"/>';
+        }
+        var lab = strOpt(it, "label");
+        if (lab == null) return;
+        var t = figText(fig, lab, e).replace(/\$/g, ""), same = labels.filter(function(l){ return Math.abs(l[0] - tx) < 2 && Math.abs(l[1] - ty) < 2; })[0];
+        if (same) same[2] += ", " + t; else labels.push([tx, ty, t, col, len > 1 ? (tx - c) / len : 0, len > 1 ? (ty - c) / len : -1]);
+      });
+    });
+    labels.forEach(function(l){ g += '<text x="' + f2(l[0] + l[4] * 14) + '" y="' + f2(l[1] + l[5] * 14 + 4) + '" text-anchor="' + (l[4] < -0.3 ? "end" : l[4] > 0.3 ? "start" : "middle") + '" style="fill:' + l[3] + '">' + esc(l[2]) + '</text>'; });
+    return '<svg class="vsvg" viewBox="0 0 ' + S + ' ' + S + '" width="' + S + '" height="' + S + '" role="img">' + g + '</svg>';
+  }
+  function tableHtml(fig, pi){
+    var its = panelItems(fig, pi), rows = its.filter(function(it){ return it.kw === "rows"; })[0];
+    var lv = rows ? loopVals(fig, rows.rest) : [null, []];
+    var cols = its.filter(function(it){ return it.kw === "column"; }).map(function(it){ var m = /^"([^"]*)"\s*=\s*(.+?)(?:\s*:\s*(\d+))?$/.exec(it.rest || ""); return m ? [m[1], m[2], m[3] == null ? 3 : +m[3]] : null; }).filter(Boolean);
+    return '<div class="tbl"><table class="vtbl"><thead><tr>' + cols.map(function(c){ return "<th>" + inline(figText(fig, c[0])) + "</th>"; }).join("") + '</tr></thead><tbody>' +
+      lv[1].map(function(v){ var e = {}; e[lv[0]] = v; return "<tr>" + cols.map(function(c){ var r = figNum(fig, c[1], e); return "<td>" + esc(isC(r) || isFinite(r) ? fmtNum(r, c[2]) : "?") + "</td>"; }).join("") + "</tr>"; }).join("") + '</tbody></table></div>';
+  }
+  function calcInputs(fig, pi){
+    return '<div class="vctls">' + fig.items.filter(function(it){ return it.pi === pi && it.kw === "input"; }).map(function(it){
+      var st = optOf(it, "step"), mn = optOf(it, "min"), mx = optOf(it, "max");
+      return '<label class="vctl num"><span>' + inline(figText(fig, strOpt(it, "label") || it.name)) + '</span><input type="number" data-var="' + esc(it.name) + '" value="' + fig.vars[it.name] + '"' +
+        (st ? ' step="' + realNum(figNum(fig, st)) + '"' : ' step="any"') + (mn ? ' min="' + realNum(figNum(fig, mn)) + '"' : "") + (mx ? ' max="' + realNum(figNum(fig, mx)) + '"' : "") + '></label>';
+    }).join("") + '</div>';
+  }
+  function calcOutputs(fig, pi){
+    return panelItems(fig, pi).filter(function(it){ return it.kw === "output"; }).map(function(it){
+      var m = /^"([^"]*)"\s*=\s*(.+?)(?:\s*:\s*(\d+))?$/.exec(it.rest || ""), r = m ? figNum(fig, m[2]) : NaN;
+      return m ? '<div class="vout"><span>' + inline(figText(fig, m[1])) + '</span><b>' + esc(isC(r) || isFinite(r) ? fmtNum(r, m[3] == null ? 4 : +m[3]) : "?") + '</b></div>' : "";
+    }).join("");
+  }
+  function redrawFig(fig, rebuild){
+    var box = document.querySelector('#frameMain [data-fig="' + fig.B.line + '"]');
+    if (!box) return;
+    if (rebuild){ box.innerHTML = figHtml(fig); return; }
+    Array.prototype.forEach.call(box.querySelectorAll(".vpanel"), function(pe){ pe.querySelector(".vdyn").innerHTML = panelHtml(fig, +pe.getAttribute("data-pi")); });
+    box.querySelector(".vcap").innerHTML = capHtml(fig);
+    Array.prototype.forEach.call(box.querySelectorAll("[data-view]"), function(b){ var on = viewHolds(fig, b.getAttribute("data-view")); b.setAttribute("aria-pressed", on); b.classList.toggle("ghost", !on); });
   }
   function checkBadge(B){
     var recs = B.checkRecs || [];
@@ -2250,7 +2556,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   }
   function renderDoc(id, info){
     var P = prog(id), html = "", L0 = info.lets;
-    STEPPERS = {};
+    STEPPERS = {}; FIGS = {};
     var bank = info.blocks.filter(function(B){ return B.type === "formula" || B.type === "definition"; });
     var usedIn = dict();   // formula id -> the problems that refer to it
     info.problems.forEach(function(p){
@@ -2868,13 +3174,28 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   });
 
   el("frameMain").addEventListener("click", function(e){
-    var b = e.target.closest("[data-step], [data-ref], [data-goto], [data-dismiss], [data-undismiss]");
+    var b = e.target.closest("[data-step], [data-ref], [data-goto], [data-dismiss], [data-undismiss], [data-view]");
     if (!b) return;
+    if (b.hasAttribute("data-view")){   // a figure's Part 1 / Part 2 / Explore button
+      var fb = b.closest("[data-fig]"), fig = fb && FIGS[fb.getAttribute("data-fig")];
+      if (fig){ pickView(fig, b.getAttribute("data-view")); redrawFig(fig, true); }
+      return;
+    }
     if (b.hasAttribute("data-dismiss")){ (DISMISSED[cur] = DISMISSED[cur] || {})[b.getAttribute("data-dismiss")] = 1; saveDismissed(); redrawFile(); return; }
     if (b.hasAttribute("data-undismiss")){ delete DISMISSED[cur]; saveDismissed(); redrawFile(); return; }
     if (b.hasAttribute("data-step")) setStepper(b.closest(".stepper"), b.getAttribute("data-step"));
     else if (b.hasAttribute("data-ref")) peek(b);
     else goLine(+b.getAttribute("data-goto").slice(1), true);
+  });
+  el("frameMain").addEventListener("input", function(e){   // a slider, toggle or calculator input moved: redraw its figure
+    var t = e.target, box = t.closest && t.closest("[data-fig]"), fig = box && FIGS[box.getAttribute("data-fig")], name = t.getAttribute && t.getAttribute("data-var");
+    if (!fig || !name) return;
+    var v = t.type === "checkbox" ? (t.checked ? 1 : 0) : parseFloat(t.value);
+    if (!isFinite(v)) return;
+    fig.vars[name] = v;
+    var o = t.nextElementSibling;
+    if (o && o.tagName === "OUTPUT") o.textContent = v.toFixed(+t.getAttribute("data-dec") || 0);
+    redrawFig(fig);
   });
   el("frameMain").addEventListener("change", function(e){   // a checklist tick is remembered
     var t = e.target, cl = t.closest && t.closest("[data-cl]");

@@ -7,7 +7,7 @@ tabs, folders, moving files, the class editor, an open file's rail and notes, th
 (on the demo, on examples-private/ when it's there, and on a broken file), the load report, the calculator window, settings and persistence across a reload.
 Exit 0 when every check passes. --shots saves screenshots. The DevTools code is RunDown's (from QuizQrusher's cdp_shot.py).
 """
-import base64, functools, http.server, json, os, shutil, socket, struct, subprocess, sys, tempfile, threading, time, urllib.request
+import base64, functools, pathlib, http.server, json, os, shutil, socket, struct, subprocess, sys, tempfile, threading, time, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHROME = next((p for p in [r"C:\Program Files\Google\Chrome\Application\chrome.exe", r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -395,13 +395,11 @@ def run(p, shots):
     print("Parser and checker")
     PARSE = ("(async function(name){ var t = await fetch(name).then(function(r){ return r.ok ? r.text() : null; }); if (t == null) return null;"
              " var d = __tf.parse(t); return { errors: d.errors, warnings: d.warnings, checks: d.checks.length, failed: d.checks.filter(function(c){ return !c.ok; }).length }; })")
-    for name, n in [("examples/demo.frame", 3), ("examples-private/ecen305-hw3.frame", 10), ("examples-private/elen304-hw3.frame", 11), ("examples-private/emf-ch5.frame", 42)]:
+    private = sorted(pathlib.Path(ROOT, "examples-private").glob("*.frame")) if os.path.isdir(os.path.join(ROOT, "examples-private")) else []
+    for name in ["examples/demo.frame"] + ["examples-private/" + f.name for f in private]:   # every real file there, whatever it's called
         r = J(PARSE + "(%s)" % json.dumps(name))
-        if r is None:
-            print("  skip " + name + " (not in this copy)")
-            continue
-        check(name + " loads with no errors", not r["errors"], r["errors"])
-        check(name + ": all %d checks pass" % n, r["checks"] == n and r["failed"] == 0, (r["checks"], r["failed"]))
+        check(name + " loads with no errors", r is not None and not r["errors"], r and r["errors"])
+        check(name + ": all %d of its checks pass" % (r["checks"] if r else 0), r is not None and r["failed"] == 0, r and (r["checks"], r["failed"]))
         for w in r["warnings"]:
             print("       warning line %d: %s" % (w["line"], w["msg"]))
     check("a file that doesn't start with @frame isn't a frame file", J("__tf.parse('hello\\n@frame {x}') === null && !!__tf.parse('// note\\n\\n@frame {x}')"))
@@ -509,13 +507,51 @@ def run(p, shots):
     check("a formula tag opens the formula right there", J("!!document.querySelector('#frameMain .stepper .peek[data-of=F2] math')"))
     p.click_el("#frameMain .stepper .step [data-ref=F2]")
     check("clicking it again closes it", not J("!!document.querySelector('#frameMain .peek')"))
-    check("visuals show a placeholder for now", J("document.querySelectorAll('#frameMain .vis').length") == 2)
+    check("visuals render as live figures", J("document.querySelectorAll('#frameMain .vis.live').length") == 2)
     p.click_el("#frameMain .checklist input[type=checkbox]")
     check("a checklist tick is remembered", any(k.startswith("c") and v for k, v in J("JSON.parse(localStorage.getItem('trainFrame:progress')).demo").items()))
     check("the source is in a closed Source box", J("!!document.getElementById('srcBox') && !document.getElementById('srcBox').open"))
     if shots:
         J("window.scrollTo(0, 0)")
         p.shot(os.path.join(shots, "render.png"))
+
+    print("Visuals")
+    J("__tf.openFile('demo')")
+    FIG = "document.querySelector('#frameMain .vis.live')"
+    SLIDE = "(function(v){ var s = " + FIG + ".querySelector('input[data-var=b]'); s.value = v; s.dispatchEvent(new Event('input', { bubbles: true })); })(%s)"
+    check("a plot draws its curve and shading", J(FIG + ".querySelectorAll('svg path').length") >= 2)
+    check("its view buttons show, with the first one picked",
+          J("Array.from(" + FIG + ".querySelectorAll('[data-view]')).map(function(b){ return b.textContent + ':' + b.getAttribute('aria-pressed'); })") == ["Part a:true", "Explore:false"])
+    check("the caption's live value is worked out", "0.632" in J(FIG + ".querySelector('.vcap').textContent"), J(FIG + ".querySelector('.vcap').textContent"))
+    J(FIG + ".querySelector('[data-view=Explore]').click()")
+    check("Explore shows its slider", J("!!" + FIG + ".querySelector('input[type=range][data-var=b]')"))
+    J(SLIDE % 5)
+    check("moving the slider updates the caption", "0.632" in J(FIG + ".querySelector('.vcap').textContent") and J(FIG + ".querySelector('output').textContent") == "5.0",
+          (J(FIG + ".querySelector('.vcap').textContent"), J(FIG + ".querySelector('output').textContent")))
+    J(SLIDE % 20)
+    check("and again at the end of its range", "0.982" in J(FIG + ".querySelector('.vcap').textContent"), J(FIG + ".querySelector('.vcap').textContent"))
+    check("the second plot draws its two marks and its legend", J("document.querySelectorAll('#frameMain .vis.live')[1].querySelectorAll('line[stroke-dasharray]').length") == 2 and
+          J("!!document.querySelectorAll('#frameMain .vis.live')[1].querySelector('.vleg math')"))
+    t304 = J("fetch('examples-private/elen304-hw3.frame').then(function(r){ return r.ok ? r.text() : null; })")
+    if t304:
+        J("(async function(t){ var a = await __tf.importTexts([{ name: 'elen304-hw3.frame', text: t }]); __tf.afterImport(a); __tf.openFile('elen304-hw3'); })(%s)" % json.dumps(t304))
+        time.sleep(0.4)
+        FIGS = "document.querySelectorAll('#frameMain .vis.live')"
+        check("ELEN 304 P1: four phasor arrows and a 7-row live table", J(FIGS + "[0].querySelectorAll('.phasor svg polygon').length") == 4 and J(FIGS + "[0].querySelectorAll('.vtbl tbody tr').length") == 7,
+              (J(FIGS + "[0].querySelectorAll('.phasor svg polygon').length"), J(FIGS + "[0].querySelectorAll('.vtbl tbody tr').length")))
+        check("ELEN 304 P4: Part 1, Part 2 and Explore views, and 19 stems", J("Array.from(" + FIGS + "[1].querySelectorAll('[data-view]')).map(function(b){ return b.textContent; })") == ["Part 1", "Part 2", "Explore"] and
+              J(FIGS + "[1].querySelectorAll('.stem svg circle').length") == 19, J(FIGS + "[1].querySelectorAll('.stem svg circle').length"))
+        check("ELEN 304 P4: the readout shows the curve's range", "range 0.5" not in J(FIGS + "[1].querySelector('.readout').textContent") and "?" not in J(FIGS + "[1].querySelector('.readout').textContent"),
+              J(FIGS + "[1].querySelector('.readout').textContent"))
+        if shots:
+            J(FIGS + "[1].scrollIntoView({block: 'start'})")
+            time.sleep(0.3)
+            p.shot(os.path.join(shots, "plot304.png"))
+            J(FIGS + "[0].scrollIntoView({block: 'start'})")
+            time.sleep(0.3)
+            p.shot(os.path.join(shots, "phasor304.png"))
+    else:
+        print("  skip the ELEN 304 visuals (examples-private isn't here)")
 
     print("Phone width")
     p.call("Emulation.setDeviceMetricsOverride", width=390, height=844, deviceScaleFactor=2, mobile=True)

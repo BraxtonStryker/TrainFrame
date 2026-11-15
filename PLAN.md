@@ -130,13 +130,13 @@ Each step ends with something you can open and react to. ★ marks the places yo
 2. ✓ **Working shell.** `git init`; the shell copied from RunDown (tokens, title bar, app switcher, settings, theme, font, KaTeX, service worker); the layout: class tabs, section tabs, folder directory, Add files, the problem rail, the notes box and the calculator window. Until steps 3 and 4 land, an opened file shows its source.
 3. ✓ **Parser and checker.** Text becomes a tree of blocks with line numbers. Unknown refs, missing answers, bad expressions and failed `check:` lines are reported. The safe expression parser lands here, with complex numbers and the adaptive integral.
 4. ✓ (first pass) **Renderer.** The title block, the rail with progress, the formula bank (group and problem chips, "Used in"), problems → parts → steppers, ref peeks (inline on desktop, a bottom sheet on phones), answers, explain rubrics, notes and callouts, and the checklist. Progress is saved per file.
-5. **Visuals.** `@plot` first, since it covers most of both walkthroughs. Then `@stem`, `@table` and `@calc`, then `@phasor`.
-6. **Hub.** The Formula sheet and Search tabs, the load report with Copy for AI, export as `.frame` and as standalone HTML, and Download for offline.
-7. **Calculator.** The TI-36X Pro modes in §5, in this order: basics, fractions and complex, solvers, stats and calculus, then matrices, vectors and base-n.
-8. **★ AI pipeline.** `prompts/generator.md` and the in-app Copy prompt. Then the real test: hand an AI the original ECEN 305 assignment, load what it writes, and tighten the spec and prompt wherever it trips.
+5. ✓ **Visuals.** `@plot` first, since it covers most of both walkthroughs. Then `@stem`, `@table` and `@calc`, then `@phasor`.
+6. ✓ **Hub.** The Formula sheet and Search tabs, the load report with Copy for AI, export as `.frame` and as standalone HTML, and Download for offline.
+7. ✓ **Calculator.** The TI-36X Pro modes in §5, in this order: basics, fractions and complex, solvers, stats and calculus, then matrices, vectors and base-n.
+8. ✓ **★ AI pipeline.** `prompts/generator.md` and the in-app Copy prompt. Then the real test: hand an AI the original ECEN 305 assignment, load what it writes, and tighten the spec and prompt wherever it trips.
 9. **Full conversions as regression tests.** Both HW3 walkthroughs, converted completely and run through the harness.
 10. **Edit view** with live preview.
-11. **★ Ship.** Create the GitHub repo and turn on Pages; add a TrainFrame card and footer link to the Homepage; add TrainFrame to the app switcher in QuizQrusher, InfoBase, CwikCard and RunDown. That touches five other repos, so I'll ask before each push.
+11. ✓ **★ Ship.** Create the GitHub repo and turn on Pages; add a TrainFrame card and footer link to the Homepage; add TrainFrame to the app switcher in QuizQrusher, InfoBase, CwikCard and RunDown. That touches five other repos, so I'll ask before each push.
 12. **Later:** cross-file refs, more visual types, unit conversions and constants in the calculator.
 
 ---

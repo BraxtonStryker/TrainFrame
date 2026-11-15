@@ -8,13 +8,13 @@ Interactive homework walkthroughs from plain-text **frame files**. You (or an AI
 
 The app is written once. Every new file is only content.
 
-**Use it:** https://braxtonstryker.github.io/TrainFrame/ (once it's published)
+**Use it:** https://braxtonstryker.github.io/TrainFrame/
 
-**Status: 0.5.** You can add files, file them into classes and folders, work in class and file tabs, open a file with its problem rail, notes, formula bank and calculator window, and change settings. Every file is checked when it loads: its math checks are worked out, and a load report lists any errors with line numbers (with a **Copy report for AI** button). Files open as walkthroughs: the formula bank with rendered math, problems with steps you reveal one at a time, and formula tags that open in place. Plots, stem plots, phasor diagrams, live tables and calculators respond to sliders and view buttons. **Copy AI prompt** hands an AI the instructions and the syntax guide. The renderer that makes it interactive and the calculator's keys come next ([PLAN.md](PLAN.md) has the steps).
+**Status: 0.6.** Files are checked when they load (a load report lists errors with line numbers, with a **Copy report for AI** button) and open as walkthroughs with live plots. Each class has a formula sheet and a search, a class or a file can be saved as one offline HTML page, and the calculator is a full TI-36X Pro style one. See Help > What's new in the app for each version.
 
 - **Classes and folders.** The Library lists every class. A file's `class:` line picks its class and its `folder:` line picks the folder. You can move files, and rename, archive or delete classes, in the app.
 - **Tabs that remember.** Open classes get tabs next to Library, and each class's open files get tabs above its sections (Assignments, Formula sheet, Search, Add files). Every tab keeps its place.
-- **An open file** has a problem rail on the left, a notes box on the right edge (one per file, saved as you type), and a calculator window that floats over every screen.
+- **An open file** has a problem rail on the left, a notes box on the right edge (one per file, saved as you type), and a calculator window that floats over every screen: a keypad with history and exact answers, solvers, statistics, a function table, matrices and number bases.
 - Installable, works offline, and keeps everything in your browser. Files are always dropped in, and nothing is uploaded.
 
 ## Writing a frame file
@@ -46,7 +46,7 @@ The whole language is in [docs/LANGUAGE.md](docs/LANGUAGE.md). [examples/demo.fr
 - `index.html`: the whole app, one file with inline CSS and JS, no build step and nothing loaded from other sites.
 - `docs/LANGUAGE.md`: the frame language. `PLAN.md`: the build plan and the decisions behind it.
 - `examples/demo.frame`: invented problems, offered by the app's "Add the demo file". Real coursework stays out of this public repo (`examples-private/` is gitignored).
-- `vendor/katex.min.js`: KaTeX (MIT, see `vendor/LICENSE-katex.txt`), for the math once the renderer is in.
+- `vendor/katex.min.js`: KaTeX (MIT, see `vendor/LICENSE-katex.txt`), for the math.
 - `sw.js`, `manifest.webmanifest`, `icons/`: the installable offline app. After changing any precached file, run `python -I tools/sw_version.py --sync` so browsers pick up the new version.
 - `tools/harness.py`: drives the app in headless Chrome and checks it. Run `python -I tools/harness.py`.
 - See [CLAUDE.md](CLAUDE.md) for development notes.

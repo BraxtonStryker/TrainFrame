@@ -325,9 +325,16 @@ def run(p, shots):
 
     print("Formula sheet and search")
     J("__tf.openClass('Demo'); __tf.showSection('formulas')")
-    check("the formula sheet lists the demo's 4 formulas", J("document.querySelectorAll('#sec_formulas .flist li').length") == 4)
+    for _ in range(50):   # the sheet's math waits for KaTeX
+        if J("!!document.querySelector('#sec_formulas math')"):
+            break
+        time.sleep(0.1)
+    check("the formula sheet shows the demo's 4 formulas as rendered cards", J("document.querySelectorAll('#sec_formulas .fcardx').length") == 4 and J("!!document.querySelector('#sec_formulas .fcardx math')"),
+          J("document.querySelectorAll('#sec_formulas .fcardx').length"))
+    check("each card links to its file and the problems that use it", J("!!document.querySelector('#sec_formulas .fused [data-open=demo]') && !!document.querySelector('#sec_formulas .fused .ref[data-open=demo][data-line]')"))
     J("__tf.showSection('search'); var s = document.getElementById('searchBox'); s.value = 'memoryless'; s.dispatchEvent(new Event('input'))")
-    check("search finds a line", J("document.querySelectorAll('#searchHits li button').length") >= 1)
+    check("search finds it and says where", J("document.querySelectorAll('#searchHits li button').length") >= 1 and "A Tour of TrainFrame · " in J("document.querySelector('#searchHits .where').textContent"),
+          J("document.querySelector('#searchHits').textContent"))
     p.click_el("#searchHits li button")
     check("a search hit opens the file in a tab", J("__tf.cur") == "demo" and J(FTABS) == ["A Tour of TrainFrame"])
 
@@ -367,6 +374,87 @@ def run(p, shots):
     pos = J("JSON.parse(localStorage.getItem('trainFrame:calcPos'))")
     check("dragging the title bar moves it and remembers the spot", pos and abs(pos["y"] - (r0[1] - 12 + 200)) < 4, (pos, r0))
     check("it stays open on other screens", J("__tf.showScreen('settings'), !document.getElementById('calcWin').classList.contains('hidden')"))
+    RES = lambda: J("document.getElementById('calcRes').textContent")
+    KEY = lambda *ks: [J('document.querySelector(\'#calcKeys [data-k="%d"]\').click()' % k) for k in ks]   # the keypad scrolls inside the window, so these are clicked by script
+    J("document.getElementById('calcIn').focus()")
+    p.type("2(3+4)\n")
+    check("typing a line and Enter works it out", RES() == "14", RES())
+    KEY(30, 21, 24, 41)   # 1 ÷ 4 =
+    check("the keys type and = works it out", RES() == "0.25", RES())
+    KEY(40)
+    check("F◂▸D shows the answer as a fraction", RES() == "1/4", RES())
+    KEY(27, 31, 41)   # × 2 = carries on from the answer
+    check("starting with an operator uses the last answer", RES() == "0.5" and J("document.querySelectorAll('#calcHist button').length") == 3, RES())
+    p.click_el('#calcKeys [data-k="0"]')
+    p.click_el('#calcKeys [data-k="2"]')
+    check("2nd then sin (with the mouse) types the inverse", J("document.getElementById('calcIn').value") == "asin(", J("document.getElementById('calcIn').value"))
+    KEY(23)
+    for src, want in [("sin(30)", "0.5"), ("cos(90)", "0"), ("5!", "120"), ("10 nCr 3", "120"), ("10 nPr 3", "720"), ("1_3/4", "1.75"), ("abs(3+4j)", "5"), ("sqrt(-4)", "2j"), ("5∠90", "5j"),
+                      ("(1+2j)(3-j)", "5 + 5j"), ("log(8, 2)", "3"), ("root(3, 27)", "3"), ("deriv(x^3, x, 2)", "12"), ("solve(x^2 - 2, x, 1)", "1.414213562"), ("integral(x = 0 to 1, x^2)", "0.3333333333"),
+                      ("7 → q", "7"), ("q^2 + ans", "56"), ("1/0", "∞"), ("e^(j*pi)", "−1"), ("2E3×2", "4000"), ("123456789012", "1.23456789E11")]:
+        got = J("(function(){ try { return __tf.calc.run(%s); } catch (e){ return 'error: ' + e.message; } })()" % json.dumps(src))
+        check("calculator: %s = %s" % (src, want), got == want, got)
+    check("a built-in name can't be stored to", "built-in" in J("(function(){ try { return __tf.calc.run('sin = 3'); } catch (e){ return e.message; } })()"))
+    J("__tf.calc.state.angle = 'rad'")
+    check("radians: sin(pi/2) = 1 and asin(1) is pi/2", J("__tf.calc.run('sin(pi/2)')") == "1" and J("__tf.calc.exact(__tf.calc.value('asin(1)'))") == "π/2")
+    J("__tf.calc.state.angle = 'deg'; __tf.calc.state.fmt = 'fix2'")
+    check("Fix 2 shows two decimals", J("__tf.calc.run('2/3')") == "0.67")
+    J("__tf.calc.state.fmt = 'eng'")
+    check("Eng uses powers of 1000", J("__tf.calc.run('12345')") == "12.345E3", J("__tf.calc.run('12345')"))
+    J("__tf.calc.state.fmt = 'norm'; __tf.calc.state.cx = 'polar'")
+    check("complex answers can show as polar", J("__tf.calc.run('3+4j')") == "5∠53.13010235", J("__tf.calc.run('3+4j')"))
+    J("__tf.calc.state.cx = 'rect'")
+    check("exact forms: fractions, mixed numbers, π and roots",
+          J("[__tf.calc.exact(0.75), __tf.calc.exact(1.75, true), __tf.calc.exact(3 * Math.PI / 4), __tf.calc.exact(Math.sqrt(12)), __tf.calc.exact(Math.SQRT1_2), __tf.calc.exact(0.1234567)]") == ["3/4", "1 3/4", "3π/4", "2√3", "√2/2", None],
+          J("[__tf.calc.exact(0.75), __tf.calc.exact(1.75, true), __tf.calc.exact(3 * Math.PI / 4), __tf.calc.exact(Math.sqrt(12)), __tf.calc.exact(Math.SQRT1_2), __tf.calc.exact(0.1234567)]"))
+    near = lambda a, b: len(a) == len(b) and all(abs(x - y) < 1e-9 for x, y in zip(a, b))
+    check("quadratic and cubic roots", near(J("__tf.calc.poly([1, -3, 2])"), [2, 1]) and near(J("__tf.calc.poly([1, -6, 11, -6])"), [3, 2, 1]) and near(J("__tf.calc.poly([1, -5, 8, -4])"), [2, 2, 1]),
+          J("[__tf.calc.poly([1, -3, 2]), __tf.calc.poly([1, -6, 11, -6]), __tf.calc.poly([1, -5, 8, -4])]"))
+    check("complex roots come in pairs", J("__tf.calc.poly([1, 2, 5]).map(function(z){ return __tf.calc.text(z); })") == ["−1 + 2j", "−1 − 2j"] and
+          J("__tf.calc.poly([1, 0, 0, -1]).map(function(z){ return __tf.calc.text(z, 4); })") == ["1", "−0.5 + 0.866j", "−0.5 − 0.866j"], J("__tf.calc.poly([1, 0, 0, -1]).map(function(z){ return __tf.calc.text(z, 4); })"))
+    check("linear systems: one answer, none, many", near(J("__tf.calc.lin([[1,1,1],[0,2,5],[2,5,-1]], [6,-4,27]).x"), [5, 3, -2]) and J("__tf.calc.lin([[1,1],[2,2]], [1,3]).none") and J("__tf.calc.lin([[1,1],[2,2]], [1,2]).many"))
+    check("matrices: product, determinant, inverse, rref", J("__tf.calc.mat('mul', [[1,2],[3,4]], [[5,6],[7,8]], 'A', 'B')") == [[19, 22], [43, 50]] and J("__tf.calc.mat('det', [[1,2],[3,4]], null, 'A')") == -2 and
+          near(sum(J("__tf.calc.mat('inv', [[1,2],[3,4]], null, 'A')"), []), [-2, 1, 1.5, -0.5]) and J("__tf.calc.mat('rref', [[1,2,3],[4,5,6]], null, 'A')") == [[1, 0, -1], [0, 1, 2]])
+    check("vectors: dot, cross, norm", J("__tf.calc.mat('dot', [[1,2,3]], [[4,5,6]], 'A', 'B')") == 32 and J("__tf.calc.mat('cross', [[1,0,0]], [[0,1,0]], 'A', 'B')") == [[0, 0, 1]] and J("__tf.calc.mat('norm', [[3,4]], null, 'A')") == 5)
+    check("a singular matrix has no inverse", "no inverse" in J("(function(){ try { __tf.calc.mat('inv', [[1,2],[2,4]], null, 'A'); return ''; } catch (e){ return e.message; } })()"))
+    st = J("__tf.calc.stats([1,2,3,4,5,6,7,8])")
+    check("1-variable stats", st["mean"] == 4.5 and abs(st["sx"] - 2.449489743) < 1e-8 and [st["q1"], st["med"], st["q3"]] == [2.5, 4.5, 6.5], st)
+    fit = lambda kind, xs, ys: J("__tf.calc.regress(%s, %s, %s).coef.map(function(c){ return c[1]; })" % (json.dumps(kind), json.dumps(xs), json.dumps(ys)))
+    check("regressions: linear, quadratic, exponential, power", near(fit("lin", [1, 2, 3], [3, 5, 7]), [2, 1]) and near(fit("quad", [0, 1, 2, 3], [1, 2, 5, 10]), [1, 0, 1]) and
+          near(fit("exp", [0, 1, 2], [2, 6, 18]), [2, 3]) and near(fit("pow", [1, 2, 3], [2, 8, 18]), [2, 2]), (fit("lin", [1, 2, 3], [3, 5, 7]), fit("quad", [0, 1, 2, 3], [1, 2, 5, 10])))
+    check("base-n: convert, XOR, NOT in 8 bits", J("__tf.calc.base('conv', 255, 0, 32)[1][1]") == "FF" and J("__tf.calc.base('xor', 255, 10, 32)[3][1]") == "1111 0101" and J("__tf.calc.base('not', 0, 0, 8)[0][1]").startswith("255") and
+          J("__tf.calc.baseParse('-1', 'dec', 8, 'A')") == 255)
+    SETF = "(function(k, v){ var x = document.querySelector('#calcBody [data-f=\"' + k + '\"]'); x.value = v; x.dispatchEvent(new Event('input', { bubbles: true })); x.dispatchEvent(new Event('change', { bubbles: true })); })(%s, %s)"
+    F = lambda k, v: J(SETF % (json.dumps(k), json.dumps(v)))
+    J("document.querySelector('[data-ct=solve]').click()")
+    F("slvKind", "quad"); F("pa", "1"); F("pb", "2"); F("pc", "5")
+    J("document.querySelector('[data-go=solve]').click()")
+    check("the Solve tab shows a quadratic's complex roots", J("Array.from(document.querySelectorAll('#slvOut .vout b')).map(function(b){ return b.textContent; })") == ["−1 + 2j", "−1 − 2j"], J("document.getElementById('slvOut').textContent"))
+    F("slvKind", "num"); F("nsF", "x^3 = 2x + 1"); F("nsX", "1")
+    J("document.querySelector('[data-go=solve]').click()")
+    check("and solves an equation near a start value", J("document.querySelector('#slvOut .vout b').textContent") == "1.618033989", J("document.getElementById('slvOut').textContent"))
+    J("document.querySelector('[data-ct=stats]').click()")
+    F("stData", "1, 3\n2, 5\n3, 7"); F("stKind", "lin")
+    J("document.querySelector('[data-go=stats]').click()")
+    check("the Stats tab fits a line", J("Array.from(document.querySelectorAll('#stOut .vout b')).map(function(b){ return b.textContent; }).slice(0, 3)") == ["2", "1", "1"], J("document.getElementById('stOut').textContent"))
+    F("stData", "1\n2\nx")
+    J("document.querySelector('[data-go=stats]').click()")
+    check("a bad line is explained, not thrown", "Line 3" in J("document.getElementById('stOut').textContent"), J("document.getElementById('stOut').textContent"))
+    J("document.querySelector('[data-ct=table]').click()")
+    F("tbF", "x^2"); F("tbStart", "1"); F("tbStep", "1"); F("tbRows", "3")
+    J("document.querySelector('[data-go=table]').click()")
+    check("the Table tab lists values", J("Array.from(document.querySelectorAll('#tbOut tbody td')).map(function(b){ return b.textContent; })") == ["1", "1", "2", "4", "3", "9"])
+    J("document.querySelector('[data-ct=matrix]').click()")
+    F("mA", "1 2\n3 4"); F("mB", "5, 6; 7, 8"); F("mxOp", "mul"); F("mxX", "A"); F("mxY", "B")
+    J("document.querySelector('[data-go=matrix]').click()")
+    J("document.querySelector('[data-mxsto=C]').click()")
+    check("the Matrix tab multiplies and stores the result", J("document.querySelector('#calcBody [data-f=mC]').value") == "19 22\n43 50", J("document.getElementById('mxOut').textContent"))
+    J("document.querySelector('[data-ct=base]').click()")
+    F("bnA", "ff"); F("bnAB", "hex"); F("bnOp", "and"); F("bnB", "1010"); F("bnBB", "bin")
+    check("the Base-n tab updates as you type", J("Array.from(document.querySelectorAll('#bnOut .vout b')).map(function(b){ return b.textContent; })") == ["10", "A", "12", "1010"], J("document.getElementById('bnOut').textContent"))
+    check("the calculator's state is kept", J("JSON.parse(localStorage.getItem('trainFrame:calc')).tab") == "base" and J("JSON.parse(localStorage.getItem('trainFrame:calc')).vars.q") == 7)
+    check("the window fits the screen", J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(); return b.bottom <= window.innerHeight && b.right <= window.innerWidth; })()"))
+    J("document.querySelector('[data-ct=calc]').click()")
 
     print("Settings")
     check("settings render with the Teal accent selected", J("document.querySelector('#set_accent [aria-pressed=true]').title") == "Teal")
@@ -553,6 +641,57 @@ def run(p, shots):
     else:
         print("  skip the ELEN 304 visuals (examples-private isn't here)")
 
+    print("Renderer fine-tuning and the hub")
+    NOTES = "\n".join(["@frame {notes-test}", "title: Notes Test", "class: Demo", "kind: notes", "",
+                       "@section First ideas", "Some text about $x^2$.", "",
+                       "@formula {N1} Energy", "$$ E = mc^2 $$", "",
+                       "@section Second ideas", "More text.", ""] + ["Filler paragraph %d.\n" % k for k in range(60)] + [
+                       "@formula {N2} Broken", "$$ \\frac{1}{2 $$", "",
+                       "@problem {P1} Try it", "@given", "Given text.", "@step First", "one", "@step Second", "the quokka step", "@answer", "done", "", "@section Last", ""] + ["Filler paragraph %d.\n" % k for k in range(60)])
+    TWIN = "\n".join(["@frame {notes-twin}", "title: Notes Twin", "class: Demo", "kind: notes", "", "@formula {T1} Energy again", "$$ E = mc^2 $$"])
+    nline = lambda text: NOTES.split("\n").index(text) + 1
+    J("document.getElementById('calcClose').click()")   # it would sit over what's clicked below
+    J("(async function(a, b){ var r = await __tf.importTexts([{ name: 'notes-test.frame', text: a }, { name: 'notes-twin.frame', text: b }]); __tf.afterImport(r); __tf.openFile('notes-test'); })(%s, %s)" % (json.dumps(NOTES), json.dumps(TWIN)))
+    time.sleep(0.4)
+    check("math KaTeX can't draw is in the load report", "KaTeX can’t draw this math" in J("document.querySelector('.lrep').textContent") and
+          J("__tf.info['notes-test'].errors.filter(function(e){ return e.kind === 'tex'; }).map(function(e){ return e.line; })") == [nline("$$ \\frac{1}{2 $$")], J("document.querySelector('.lrep').textContent"))
+    check("math that draws isn't flagged", J("__tf.info.demo.errors.length") == 0, J("__tf.info.demo.errors"))
+    check("a notes file shows its formulas in the bank and where they're written", J("document.querySelectorAll('#fbank .fcardx').length") == 2 and J("document.querySelectorAll('#frameMain .fcardx.inl').length") == 2 and
+          J("document.getElementById('L%d').classList.contains('inl')" % nline("@formula {N1} Energy")))
+    check("its rail lists the sections with the problems, in order", J("Array.from(document.querySelectorAll('#rail a .rn')).map(function(e){ return e.textContent; })") == ["Fx", "§", "§", "P1", "§"] and
+          J("document.querySelector('#rail .rail-h').textContent") == "Contents", J("document.getElementById('rail').textContent"))
+    J("document.querySelectorAll('#rail a')[2].click()")
+    time.sleep(1.2)
+    J("window.dispatchEvent(new Event('scroll'))")
+    time.sleep(0.2)
+    check("the rail marks the section you're in", J("(document.querySelector('#rail a[aria-current]') || {}).textContent") == "§Second ideas", J("(document.querySelector('#rail a[aria-current]') || {}).textContent"))
+    J("__tf.openClass('Demo'); __tf.showSection('formulas')")
+    CARD = "Array.from(document.querySelectorAll('#sec_formulas .fcardx')).filter(function(c){ return c.textContent.indexOf('Energy') >= 0; })"
+    check("the formula sheet shows a formula that's in two files once, with both files", J(CARD + ".length") == 1 and J(CARD + "[0].querySelectorAll('.fused').length") == 2, J(CARD + ".length"))
+    J("__tf.showSection('search'); var s = document.getElementById('searchBox'); s.value = 'quokka'; s.dispatchEvent(new Event('input'))")
+    check("a search result says which step it's in", J("document.querySelector('#searchHits .where').textContent") == "Notes Test · P1 · Step 2", J("document.getElementById('searchHits').textContent"))
+    p.click_el("#searchHits li button")
+    time.sleep(0.2)
+    check("opening it shows that step", J("__tf.cur") == "notes-test" and J("!!document.getElementById('L%d').offsetParent" % nline("@step Second")) and J("document.querySelector('#frameMain .stepper .cnt').textContent") == "2 / 3",
+          J("document.querySelector('#frameMain .stepper .cnt').textContent"))
+    J("document.querySelector('.lrep [data-dismiss]').click()")
+    check("progress and dismissed items are kept per file", J("!!JSON.parse(localStorage.getItem('trainFrame:progress'))['notes-test'] && !!JSON.parse(localStorage.getItem('trainFrame:dismissed'))['notes-test']"))
+    J("__tf.goFolder('Demo', '')")
+    check("Download for offline is offered in a class", J("!!document.querySelector('#sec_assignments [data-act=offline]')"))
+    p.click_el("[data-act=del][data-id=notes-test]")
+    p.click_el("[data-act=del][data-id=notes-twin]")
+    time.sleep(0.2)
+    check("deleting a file clears its progress and dismissed items", J("!__tf.files['notes-test'] && !JSON.parse(localStorage.getItem('trainFrame:progress'))['notes-test'] && !JSON.parse(localStorage.getItem('trainFrame:dismissed'))['notes-test']"),
+          J("[localStorage.getItem('trainFrame:progress'), localStorage.getItem('trainFrame:dismissed')]"))
+    J("__tf.openFile('demo'); window.scrollTo(0, 900)")
+    time.sleep(0.2)
+    y0 = J("window.scrollY")
+    J("__tf.flush().then(function(){ window.dispatchEvent(new Event('pagehide')); location.reload(); })")
+    time.sleep(0.5)
+    p.wait_ready()
+    time.sleep(0.5)
+    check("a reload comes back to the same spot, with the math drawn", y0 > 300 and abs(J("window.scrollY") - y0) <= 2 and J("!!document.querySelector('#fbank math')"), (y0, J("window.scrollY")))
+
     print("Phone width")
     p.call("Emulation.setDeviceMetricsOverride", width=390, height=844, deviceScaleFactor=2, mobile=True)
     J("__tf.openFile('demo')")
@@ -562,12 +701,62 @@ def run(p, shots):
     check("the rail strip sits right under the sticky bars", J("getComputedStyle(document.getElementById('rail')).top") == J(UNDER),
           (J("getComputedStyle(document.getElementById('rail')).top"), J(UNDER)))
     check("the page doesn't scroll sideways", J("document.documentElement.scrollWidth <= window.innerWidth"), J("[document.documentElement.scrollWidth, window.innerWidth]"))
+    J("document.getElementById('calcBtn').click()")
     check("the calculator spans the width", J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(); return b.left <= 9 && b.right >= window.innerWidth - 9; })()"))
+    check("and fits the height, with every key reachable", J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(), k = document.getElementById('calcKeys'); return b.top >= 0 && b.bottom <= window.innerHeight && k.scrollWidth <= k.clientWidth + 1; })()"),
+          J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(); return [b.top, b.bottom, window.innerHeight]; })()"))
+    if shots:
+        p.shot(os.path.join(shots, "phone-calc.png"))
+    J("document.getElementById('calcClose').click()")
+    FITS = "(function(sel){ return Array.from(document.querySelectorAll(sel)).every(function(e){ var b = e.getBoundingClientRect(); return !b.width || (b.left >= -1 && b.right <= window.innerWidth + 1); }); })"
+    J("document.querySelector('#frameMain .stepper [data-step=all]').click()")
+    check("steppers and their buttons fit a phone", J(FITS + "('#frameMain .stepper, #frameMain .stepper .ctl .btn, #frameMain .unit')"))
+    J("document.querySelector('#frameMain .stepper .step [data-ref=F2]').scrollIntoView({ block: 'center' }); document.querySelector('#frameMain .stepper .step [data-ref=F2]').click()")
+    check("a formula peek opens in place and fits", J("!!document.querySelector('#frameMain .peek[data-of=F2]')") and J(FITS + "('#frameMain .peek')"))
+    if shots:
+        p.shot(os.path.join(shots, "phone-peek.png"))
+    J("document.querySelector('#frameMain .stepper .step [data-ref=F2]').click()")
+    check("figures fit the column", J(FITS + "('#frameMain .vis.live, #frameMain .vis.live svg, #frameMain .vis.live .vctl')"),
+          J("Array.from(document.querySelectorAll('#frameMain .vis.live svg')).map(function(e){ var b = e.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.right)]; })"))
+    if shots:
+        J("document.querySelector('#frameMain .vis.live').scrollIntoView({ block: 'start' })")
+        time.sleep(0.2)
+        p.shot(os.path.join(shots, "phone-figure.png"))
+    J("document.getElementById('fxToggle').click()")
+    check("the formula dock panel fits a phone", J("!document.getElementById('fxPanel').classList.contains('hidden')") and J(FITS + "('#fxPanel, .docktabs .notetab')"),
+          J("(function(){ var b = document.getElementById('fxPanel').getBoundingClientRect(); return [b.left, b.right]; })()"))
+    if shots:
+        p.shot(os.path.join(shots, "phone-dock.png"))
+    J("document.getElementById('noteToggle').click()")
+    check("and so does the notes box", J("!document.getElementById('notePanel').classList.contains('hidden')") and J(FITS + "('#notePanel')"))
+    J("document.getElementById('noteClose').click()")
+    check("the page still doesn't scroll sideways", J("document.documentElement.scrollWidth <= window.innerWidth"), J("[document.documentElement.scrollWidth, window.innerWidth]"))
+    J("__tf.openClass('Demo')")
+    check("a class's Assignments fit a phone", J("document.documentElement.scrollWidth <= window.innerWidth"), J("[document.documentElement.scrollWidth, window.innerWidth]"))
+    J("__tf.openFile('demo'); window.scrollTo(0, 0)")
     if shots:
         p.shot(os.path.join(shots, "phone.png"))
     J("__tf.showScreen('home')")
     check("the Library fits a phone too", J("document.documentElement.scrollWidth <= window.innerWidth"), J("[document.documentElement.scrollWidth, window.innerWidth]"))
     p.call("Emulation.clearDeviceMetricsOverride")
+
+    print("Standalone copy")
+    html = J("__tf.standaloneHtml(['demo'], { file: 'demo' })")
+    check("a standalone copy carries the file and KaTeX, once each", html.count('<script id="tfBundle"') == 1 and html.count('<script id="tfKatex"') == 1 and html.count("</html>") == 1, len(html))
+    tmp = os.path.join(ROOT, ".harness-standalone.html")
+    open(tmp, "w", encoding="utf-8", newline="").write(html)
+    try:
+        port = J("location.port")
+        p.call("Page.navigate", url="http://localhost:%s/.harness-standalone.html" % port)   # another origin, so nothing is stored there yet
+        time.sleep(0.5)
+        p.wait_ready()
+        time.sleep(0.5)
+        check("opened by itself, it has the file and opens it", J("Object.keys(__tf.files)") == ["demo"] and J("__tf.cur") == "demo", (J("Object.keys(__tf.files)"), J("__tf.cur")))
+        check("its math is drawn without fetching KaTeX", J("!!document.querySelector('#fbank math')") and not J("!!document.querySelector('script[src*=katex]')"))
+        again = J("__tf.standaloneHtml(['demo'], { file: 'demo' })")
+        check("a copy made from a copy doesn't pile up", again.count('<script id="tfBundle"') == 1 and again.count('<script id="tfKatex"') == 1 and abs(len(again) - len(html)) < 200, (len(again), len(html)))
+    finally:
+        os.remove(tmp)
 
 
 if __name__ == "__main__":

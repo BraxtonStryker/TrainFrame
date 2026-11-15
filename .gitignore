@@ -8,3 +8,6 @@ __pycache__/
 examples-private/
 ECEN 305 HW3 Walkthrough.html
 ELEN304 HW3 Walkthrough.html
+
+# Left behind only if the harness is killed mid-run
+.harness-standalone.html

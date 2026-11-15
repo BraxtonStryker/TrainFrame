@@ -9,7 +9,7 @@
  * - Cache names start with "trainFrame-": every GitHub Pages project of this user shares the origin.
  */
 "use strict";
-const VERSION = "0f3c4e44578a"; // generated: tools/sw_version.py --sync
+const VERSION = "3f8223d8f0c2"; // generated: tools/sw_version.py --sync
 const CACHE = "trainFrame-" + VERSION;
 const PRECACHE = [
   "./",

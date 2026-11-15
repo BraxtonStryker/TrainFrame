@@ -374,7 +374,7 @@ def run(p, shots):
     pos = J("JSON.parse(localStorage.getItem('trainFrame:calcPos'))")
     check("dragging the title bar moves it and remembers the spot", pos and abs(pos["y"] - (r0[1] - 12 + 200)) < 4, (pos, r0))
     check("it stays open on other screens", J("__tf.showScreen('settings'), !document.getElementById('calcWin').classList.contains('hidden')"))
-    RES = lambda: J("document.getElementById('calcRes').textContent")
+    RES = lambda: J("document.getElementById('calcRes').getAttribute('data-text')")
     KEY = lambda *ks: [J('document.querySelector(\'#calcKeys [data-k="%d"]\').click()' % k) for k in ks]   # the keypad scrolls inside the window, so these are clicked by script
     J("document.getElementById('calcIn').focus()")
     p.type("2(3+4)\n")
@@ -383,6 +383,17 @@ def run(p, shots):
     check("the keys type and = works it out", RES() == "0.25", RES())
     KEY(40)
     check("F◂▸D shows the answer as a fraction", RES() == "1/4", RES())
+    check("the answer and the history are typeset", J("!!document.querySelector('#calcRes math mfrac')") and J("document.querySelectorAll('#calcHist button > span math').length") == 2 and J("!!document.querySelector('#calcHist math mfrac')"),
+          J("document.getElementById('calcHist').innerHTML")[:900])
+    J("var i = document.getElementById('calcIn'); i.value = 'sqrt(2)/3 + x^2'; i.dispatchEvent(new Event('input'))")
+    check("what's typed is typeset as you type", J("!!document.querySelector('#calcPrev math msqrt') && !!document.querySelector('#calcPrev math msup')"), J("document.getElementById('calcPrev').innerHTML")[:200])
+    J("var i = document.getElementById('calcIn'); i.value = 'sin(30'; i.dispatchEvent(new Event('input'))")
+    check("an open bracket is closed for the picture", "sin" in J("document.getElementById('calcPrev').textContent") and not J("document.getElementById('calcPrev').classList.contains('stale')"))
+    J("document.querySelector('[data-nav=left]').click(); document.querySelector('[data-nav=left]').click(); document.querySelector('#calcKeys [data-k=\"18\"]').click()")
+    check("the caret keys move where the next key types", J("document.getElementById('calcIn').value") == "sin(730", J("document.getElementById('calcIn').value"))
+    J("document.querySelector('[data-nav=up]').click()")
+    check("▲ brings back the last line", J("document.getElementById('calcIn').value") == "1÷4", J("document.getElementById('calcIn').value"))
+    J("document.querySelector('#calcKeys [data-k=\"23\"]').click(); __tf.calc.run('1/4')")
     KEY(27, 31, 41)   # × 2 = carries on from the answer
     check("starting with an operator uses the last answer", RES() == "0.5" and J("document.querySelectorAll('#calcHist button').length") == 3, RES())
     p.click_el('#calcKeys [data-k="0"]')
@@ -705,8 +716,12 @@ def run(p, shots):
     check("the calculator spans the width", J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(); return b.left <= 9 && b.right >= window.innerWidth - 9; })()"))
     check("and fits the height, with every key reachable", J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(), k = document.getElementById('calcKeys'); return b.top >= 0 && b.bottom <= window.innerHeight && k.scrollWidth <= k.clientWidth + 1; })()"),
           J("(function(){ var b = document.getElementById('calcWin').getBoundingClientRect(); return [b.top, b.bottom, window.innerHeight]; })()"))
+    check("its keys are thumb-sized and it sits on the bottom edge", J("document.querySelector('#calcKeys .num').getBoundingClientRect().height") >= 44 and
+          J("Math.round(document.getElementById('calcWin').getBoundingClientRect().bottom) === window.innerHeight"), J("document.querySelector('#calcKeys .num').getBoundingClientRect().height"))
     if shots:
+        J("__tf.calc.run('sqrt(2)/2 + 1/3'); __tf.calc.run('5∠30'); var i = document.getElementById('calcIn'); i.value = '2^10/(3+x)'; i.dispatchEvent(new Event('input'))")
         p.shot(os.path.join(shots, "phone-calc.png"))
+        J("var i = document.getElementById('calcIn'); i.value = ''; i.dispatchEvent(new Event('input'))")
     J("document.getElementById('calcClose').click()")
     FITS = "(function(sel){ return Array.from(document.querySelectorAll(sel)).every(function(e){ var b = e.getBoundingClientRect(); return !b.width || (b.left >= -1 && b.right <= window.innerWidth + 1); }); })"
     J("document.querySelector('#frameMain .stepper [data-step=all]').click()")

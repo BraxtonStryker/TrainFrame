@@ -444,12 +444,12 @@
   .calc-tabs button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
   .calc-body{padding:10px 12px 12px; overflow:auto; scrollbar-width:thin}
   .calc-screen{background:var(--code-bg); border:1px solid var(--line); border-radius:var(--radius-sm); padding:6px 10px 8px; font-family:var(--font-mono)}
-  .chist{max-height:88px; overflow:auto; display:flex; flex-direction:column; scrollbar-width:thin}
-  .chist button{display:flex; justify-content:space-between; gap:12px; flex-shrink:0; background:none; border:none; color:var(--muted); font-family:var(--font-mono); font-size:calc(12px * var(--fs)); padding:1px 0; text-align:left}
+  .chist{max-height:132px; overflow:auto; display:flex; flex-direction:column; scrollbar-width:thin}
+  .chist button{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-shrink:0; background:none; border:none; color:var(--muted); font-family:var(--font-mono); font-size:calc(12px * var(--fs)); padding:1px 0; text-align:left}
   .chist button{width:100%; min-width:0}
-  .chist button span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .chist button > span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .chist button b{color:var(--ink); font-weight:600; white-space:nowrap}
-  .chist button:hover span{color:var(--accent)}
+  .chist button:hover > span{color:var(--accent)}
   .cinput{display:block; width:100%; background:none; border:none; outline:none; color:var(--ink); font-family:var(--font-mono); font-size:calc(15px * var(--fs)); padding:5px 0 2px}
   .chist:not(:empty) + .cinput{border-top:1px solid var(--line); margin-top:4px}
   .calc-screen .res{text-align:right; font-size:calc(21px * var(--fs)); font-weight:700; white-space:nowrap; overflow-x:auto; scrollbar-width:none; min-height:1.4em}
@@ -457,6 +457,15 @@
   .calc-modes{display:flex; align-items:center; gap:6px; margin:8px 0}
   .calc-modes select, .csel{font-family:inherit; font-size:calc(12.5px * var(--fs)); color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:4px 6px; max-width:100%; min-width:0}
   .calc-modes .linkbtn{margin-left:auto; font-size:calc(12.5px * var(--fs)); padding:2px}
+  .calc math{font-size:1.18em}
+  .chist button{padding:3px 0}
+  .cprev{min-height:1.9em; padding:4px 0 0; color:var(--muted); overflow-x:auto; overflow-y:hidden; white-space:nowrap; scrollbar-width:none; font-size:calc(15px * var(--fs))}
+  .cprev.stale{opacity:.45}
+  .calc-screen .res{padding-top:2px}
+  .calc-screen .res math{font-size:1.05em}
+  .kp.knav{margin-bottom:5px}
+  .kp.knav button{min-height:28px; padding:3px 0; justify-content:center; font-size:calc(12px * var(--fs)); color:var(--muted)}
+  .calc button, .calc select{touch-action:manipulation}
   .cmem{font-family:var(--font-mono); font-size:calc(12px * var(--fs)); color:var(--muted); margin:0 0 8px; white-space:pre-wrap; overflow-wrap:anywhere}
   .cmem .linkbtn{font-family:var(--font-body); font-size:inherit; padding:2px 0 0}
   .kp{display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:5px}
@@ -490,7 +499,23 @@
   .cout .vout{font-size:calc(13.5px * var(--fs))}
   .cout .vout b{text-align:right; overflow-wrap:anywhere}
   .cmat td{text-align:right}
-  @media (max-width:560px){ .calc{left:8px !important; right:8px; top:auto !important; bottom:8px; width:auto; max-height:min(84vh, calc(100vh - 16px)) !important} .calc-head{cursor:default} .kp button{min-height:40px} }
+  @media (max-width:560px){   /* a phone: a sheet across the bottom with keys big enough for a thumb, and text fields that don't make iOS zoom */
+    .calc{left:0 !important; right:0; top:auto !important; bottom:0; width:auto; max-width:none; max-height:94vh !important; max-height:94dvh !important; border-radius:16px 16px 0 0; border-width:1px 0 0; padding-bottom:env(safe-area-inset-bottom)}
+    .calc-head{cursor:default; padding:3px 6px 3px 14px}
+    .calc-tabs button{padding:10px 5px 9px; font-size:14px}
+    .calc-body{padding:8px 8px 10px}
+    .kp{gap:6px}
+    .kp button{min-height:46px; font-size:17px; border-radius:10px}
+    .kp .k2{font-size:11px; min-height:13px}
+    .kp .num, .kp .op, .kp .eq{font-size:20px}
+    .kp .fnk{font-size:14px}
+    .kp.knav button{min-height:36px; font-size:14px}
+    .calc input, .calc select, .calc textarea{font-size:16px}
+    .calc-modes select{padding:7px 6px}
+    .chist{max-height:96px}
+    .calc-screen .res{font-size:26px}
+    .chelp{display:none}
+  }
 
   /* ---------- Settings rows (as in QuizQrusher) ---------- */
   .page{max-width:820px; margin:0 auto; padding:24px 16px 96px}
@@ -726,6 +751,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     <p><button class="btn sm" id="aiCopyHelp" type="button">Copy AI prompt</button></p>
     <h2>What's new</h2>
     <dl class="versions">
+      <dt>0.6.1 (2026-11-15)</dt>
+      <dd>The calculator draws its math: what you type, the history and the answer show as stacked fractions, roots and powers. On a phone it’s a sheet across the bottom with bigger keys, the keys type without the phone’s keyboard coming up (<b>abc</b> brings it back), and a new row moves the caret and steps through earlier lines.</dd>
       <dt>0.6.0 (2026-11-15)</dt>
       <dd>The <b>calculator</b> works: a TI-36X Pro style keypad with history, memory and exact answers, plus tabs for solvers, statistics, a function table, matrices and number bases. The <b>Formula sheet</b> shows rendered cards, each formula once, linked to where it’s used. <b>Search</b> points at problems, steps and formulas and opens the step it finds. <b>Download for offline</b> and <b>Download HTML</b> save TrainFrame with your files inside as one page. The load report now lists math that can’t be drawn, notes files show formulas where they’re written and list their sections in the rail, and a reloaded file comes back at the same spot.</dd>
       <dt>0.5.0 (2026-11-02)</dt>
@@ -845,7 +872,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 (function(){
   "use strict";
 
-  var APP_VERSION = "0.6.0";
+  var APP_VERSION = "0.6.1";
   var NS = "trainFrame:";   // every GitHub Pages project of this user shares one origin, so namespace every key
   var UNSORTED = "Unsorted";   // the class tab for files with no class: line
   var el = function(id){ return document.getElementById(id); };
@@ -2952,6 +2979,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
   function katexHere(){   // draw the math that was waiting, and let the load reports count what KaTeX can't draw
     katexState = 2;
     katexWait.splice(0).forEach(function(fn){ fn(); });
+    if (el("calcIn")){ drawHist(); showRes(); drawPrev(); }   // the calculator's math
     if (!started) return;
     if (!el("fxPanel").classList.contains("hidden")) renderFx();
     if (cur && SCREEN === "class") redrawFile();
@@ -3451,11 +3479,14 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     el("calcBody").innerHTML =
       '<div data-pane="calc"><div class="calc-screen"><div class="chist" id="calcHist" aria-label="History"></div>' +
         '<input id="calcIn" class="cinput" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Expression" placeholder="Type here, or use the keys">' +
-        '<div class="res" id="calcRes" aria-live="polite">0</div></div>' +
+        '<div class="cprev" id="calcPrev" aria-hidden="true"></div><div class="res" id="calcRes" aria-live="polite">0</div></div>' +
         '<div class="calc-modes"><select id="calcAngle" aria-label="Angle unit"><option value="deg">DEG</option><option value="rad">RAD</option><option value="grad">GRAD</option></select>' +
         '<select id="calcFmt" aria-label="Number format">' + [["norm", "Norm"], ["sci", "Sci"], ["eng", "Eng"]].concat(fix09).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join("") + '</select>' +
         '<select id="calcCx" aria-label="Complex numbers as"><option value="rect">a + bj</option><option value="polar">r∠θ</option></select>' +
         '<button class="linkbtn" id="calcVars" type="button" aria-expanded="false">Memory</button></div><div class="cmem hidden" id="calcMem"></div>' +
+        '<div class="kp knav" id="calcNav"><button type="button" data-nav="left" aria-label="Move left">◀</button><button type="button" data-nav="right" aria-label="Move right">▶</button>' +
+        '<button type="button" data-nav="comma" aria-label="Comma">,</button><button type="button" data-nav="up" aria-label="Earlier line">▲</button><button type="button" data-nav="down" aria-label="Later line">▼</button>' +
+        '<button type="button" data-nav="kb" id="calcKb" aria-pressed="false" title="Type with the keyboard" aria-label="Type with the keyboard">abc</button></div>' +
         '<div class="kp" id="calcKeys">' + KEYS.map(function(k, i){ return '<button type="button" data-k="' + i + '" class="' + (k[4] || "") + '"><span class="k2">' + esc(k[2] || "") + '</span><span class="k1">' + esc(k[0]) + '</span></button>'; }).join("") + '</div>' +
         '<details class="chelp"><summary>What can I type?</summary><p>Anything a frame file can: <code>2(3+4)</code>, <code>sqrt(2)</code>, <code>3 + 4j</code>, <code>sum(n = 1 to 10, n^2)</code>, <code>integral(x = 0 to pi, sin(x))</code>, <code>Q(1.5)</code>. ' +
         'Plus the calculator’s own: <code>5!</code>, <code>10 nCr 3</code>, <code>1_3/4</code> (a mixed number), <code>5∠30</code> (polar), <code>log(8, 2)</code>, <code>root(3, 27)</code>, <code>deriv(x^2, x, 3)</code>, <code>solve(x^2 - 2, x, 1)</code>. ' +
@@ -3487,17 +3518,104 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     Array.prototype.forEach.call(el("calcBody").children, function(p){ p.classList.toggle("hidden", p.getAttribute("data-pane") !== name); });
   }
   function fv(key){ var x = el("calcBody").querySelector('[data-f="' + key + '"]'); return x ? x.value : ""; }
+  // --- typeset math (KaTeX) for the Calc tab: what's typed, the history and the answer
+  var TEX_FN = dict({ sin: "\\sin", cos: "\\cos", tan: "\\tan", sinh: "\\sinh", cosh: "\\cosh", tanh: "\\tanh", ln: "\\ln", log: "\\log", arg: "\\arg",
+    asin: "\\sin^{-1}", acos: "\\cos^{-1}", atan: "\\tan^{-1}", asinh: "\\sinh^{-1}", acosh: "\\cosh^{-1}", atanh: "\\tanh^{-1}", re: "\\operatorname{Re}", im: "\\operatorname{Im}" });
+  function texName(n){ return n === "pi" ? "\\pi " : n === "inf" ? "\\infty " : n.length === 1 ? n : "\\mathrm{" + n.replace(/_/g, "\\_") + "}"; }
+  function texNum(v){ var t = String(v), m = /^(.*)e([+-]?\d+)$/.exec(t); return m ? m[1] + "\\times 10^{" + (+m[2]) + "}" : t; }
+  function isSum(n){ return n.t === "bin" && (n.op === "+" || n.op === "-"); }
+  function par(t){ return "\\left(" + t + "\\right)"; }
+  function toTex(n){   // a syntax tree as LaTeX: fractions stacked, roots drawn, powers raised
+    var a, b, x = function(k){ return toTex(n.args[k]); };
+    var inMul = function(m, right){ return isSum(m) || (right && m.t === "neg") ? par(toTex(m)) : toTex(m); };
+    switch (n.t){
+      case "num": return texNum(n.v);
+      case "var": return texName(n.n);
+      case "neg": return "-" + (isSum(n.a) ? par(toTex(n.a)) : toTex(n.a));
+      case "bin":
+        if (n.op === "/") return "\\frac{" + toTex(n.a) + "}{" + toTex(n.b) + "}";
+        if (n.op === "^") return ((n.a.t === "num" && n.a.v >= 0 && String(n.a.v).indexOf("e") < 0) || n.a.t === "var" ? toTex(n.a) : par(toTex(n.a))) + "^{" + toTex(n.b) + "}";
+        if (n.op === "+" || n.op === "-"){ b = toTex(n.b); return toTex(n.a) + n.op + ((n.op === "-" && isSum(n.b)) || n.b.t === "neg" ? par(b) : b); }
+        if (n.op === "%") return inMul(n.a) + "\\bmod " + inMul(n.b, true);
+        a = inMul(n.a); b = inMul(n.b, true);
+        var digit = n.b.t === "num" || (n.b.t === "bin" && n.b.op === "^" && n.b.a.t === "num");
+        return a + (digit ? "\\times " : n.a.t === "num" ? "" : "\\cdot ") + b;   // 2x and 2(x+1) touch, 2 × 3 gets a cross
+      case "cmp": return n.args.map(toTex).reduce(function(t, v, k){ return t + ({ "<=": "\\le ", ">=": "\\ge ", "==": "=", "!=": "\\ne " }[n.ops[k - 1]] || n.ops[k - 1]) + v; });
+      case "and": case "or": return toTex(n.a) + "\\text{ " + n.t + " }" + toTex(n.b);
+      case "not": return "\\text{not }" + par(toTex(n.a));
+      case "bind":
+        a = n.kind === "integral" ? "\\int" : n.kind === "sum" ? "\\sum" : "\\prod";
+        b = isSum(n.body) ? par(toTex(n.body)) : toTex(n.body);
+        return a + "_{" + (n.kind === "integral" ? "" : texName(n.v) + "=") + toTex(n.lo) + "}^{" + toTex(n.hi) + "}" + b + (n.kind === "integral" ? "\\,d" + texName(n.v) : "");
+      case "call":
+        var k = n.args.length;
+        if (n.n === "sqrt" && k === 1) return "\\sqrt{" + x(0) + "}";
+        if (n.n === "cbrt" && k === 1) return "\\sqrt[3]{" + x(0) + "}";
+        if (n.n === "root" && k === 2) return "\\sqrt[" + x(0) + "]{" + x(1) + "}";
+        if (n.n === "abs" && k === 1) return "\\left|" + x(0) + "\\right|";
+        if (n.n === "conj" && k === 1) return "\\overline{" + x(0) + "}";
+        if (n.n === "exp" && k === 1) return "e^{" + x(0) + "}";
+        if (n.n === "fact" && k === 1) return (n.args[0].t === "num" || n.args[0].t === "var" ? x(0) : par(x(0))) + "!";
+        if ((n.n === "nCr" || n.n === "nPr") && k === 2) return "{}_{" + x(0) + "}" + n.n.charAt(1) + "_{" + x(1) + "}";
+        if (n.n === "polar" && k === 2) return x(0) + "\\angle " + x(1);
+        if (n.n === "log" && k === 2) return "\\log_{" + x(1) + "}" + par(x(0));
+        if (n.n === "deriv" && k === 3) return "\\left.\\frac{d}{d" + x(1) + "}" + par(x(0)) + "\\right|_{" + x(1) + "=" + x(2) + "}";
+        return (TEX_FN[n.n] || "\\operatorname{" + n.n.replace(/_/g, "\\_") + "}") + par(n.args.map(toTex).join(","));
+    }
+    return "";
+  }
+  function exprTex(src){   // a typed line, with "x = ..." and "... → x" kept around the expression
+    var t = String(src).trim(), m, pre = "", post = "";
+    if (/^[*\/^×÷+]/.test(t)) t = "ans" + t;
+    if ((m = /^(.*)(?:→|->)\s*([A-Za-z_]\w*)$/.exec(t))){ t = m[1]; post = "\\to " + texName(m[2]); }
+    else if ((m = /^([A-Za-z_]\w*)\s*=(?!=)(.*)$/.exec(t))){ pre = texName(m[1]) + "="; t = m[2]; }
+    return pre + toTex(parseExpr(calcPre(t))) + post;
+  }
+  function answerTex(t){   // an answer's text (3/4, 1 3/4, 2√3/3, 3π/4, 1.5E−7, 5∠30) as LaTeX
+    return t.replace(/−/g, "-").replace(/\(([^()]*)\)j/g, "$1 j").replace(/(\d+) (\d+)\/(\d+)/g, "$1\\tfrac{$2}{$3}")
+      .replace(/(\d*(?:π|√\d+)|\d+)\/(\d+)/g, "\\frac{$1}{$2}").replace(/√(\d+)/g, "\\sqrt{$1}").replace(/π/g, "\\pi ")
+      .replace(/(\d)E(-?\d+)/g, "$1\\times 10^{$2}").replace(/∠/g, "\\angle ").replace(/∞/g, "\\infty ").replace(/undefined/, "\\text{undefined}");
+  }
+  function calcMath(make, plain){   // make() gives LaTeX; plain is shown when KaTeX isn't here or can't draw it
+    if (katexState === 2 && window.katex){ try { return window.katex.renderToString("\displaystyle " + make(), { output: "mathml", throwOnError: true, strict: "ignore" }); } catch (e){} }
+    return esc(plain);
+  }
   function drawHist(){
     var box = el("calcHist");
-    box.innerHTML = CALC.hist.map(function(h, i){ return '<button type="button" data-h="' + i + '" title="Use this line again"><span>' + esc(h.e) + '</span><b>' + esc(h.r) + '</b></button>'; }).join("");
+    box.innerHTML = CALC.hist.map(function(h, i){
+      return '<button type="button" data-h="' + i + '" title="Use this line again"><span>' + calcMath(function(){ return exprTex(h.e); }, h.e) + '</span><b>' + calcMath(function(){ return answerTex(h.r); }, h.r) + '</b></button>';
+    }).join("");
     box.scrollTop = box.scrollHeight;
   }
   function showRes(err){
     var r = el("calcRes");
     r.classList.toggle("bad", !!err);
-    if (err){ r.textContent = String(err.message || err).replace(/^./, function(c){ return c.toUpperCase(); }); return; }
-    var v = calcLast == null ? CALC.ans : calcLast, t = calcShow ? exactText(v, calcShow === 2) : null;
-    r.textContent = t || calcText(v);
+    if (err){ r.textContent = String(err.message || err).replace(/^./, function(c){ return c.toUpperCase(); }); r.removeAttribute("data-text"); return; }
+    var v = calcLast == null ? CALC.ans : calcLast, t = (calcShow ? exactText(v, calcShow === 2) : null) || calcText(v);
+    r.setAttribute("data-text", t);   // the answer as plain text, whatever the math looks like
+    r.innerHTML = calcMath(function(){ return answerTex(t); }, t);
+  }
+  function drawPrev(){   // what's being typed, typeset as it will be read (open brackets are closed for the picture)
+    var box = el("calcPrev"), src = el("calcIn").value.trim(), open = 0, html = "";
+    for (var k = 0; k < src.length; k++) open += src.charAt(k) === "(" ? 1 : src.charAt(k) === ")" ? -1 : 0;
+    var full = src + (open > 0 ? new Array(open + 1).join(")") : "");
+    if (src && katexState === 2) html = calcMath(function(){ return exprTex(full); }, "");
+    if (html || !src){ box.innerHTML = html; box.classList.remove("stale"); } else box.classList.add("stale");   // half-typed: keep the last picture, dimmed
+  }
+  function histStep(up){   // earlier lines, as on the TI
+    var n = CALC.hist.length, inp = el("calcIn");
+    if (!n) return;
+    calcAt = up ? (calcAt < 0 ? n - 1 : Math.max(0, calcAt - 1)) : (calcAt < 0 || calcAt >= n - 1 ? -1 : calcAt + 1);
+    inp.value = calcAt < 0 ? "" : CALC.hist[calcAt].e; inp.setSelectionRange(inp.value.length, inp.value.length);
+    drawPrev();
+  }
+  function calcNav(act){   // the row above the keys: move the caret, a comma, earlier lines, the phone's own keyboard
+    var inp = el("calcIn"), a = inp.selectionStart == null ? inp.value.length : inp.selectionStart;
+    if (act === "left" || act === "right"){ a = Math.max(0, Math.min(inp.value.length, a + (act === "left" ? -1 : 1))); inp.setSelectionRange(a, a); }
+    else if (act === "comma") calcType(", ");
+    else if (act === "up" || act === "down") histStep(act === "up");
+    else { var on = inp.getAttribute("inputmode") === "none"; inp.setAttribute("inputmode", on ? "text" : "none"); el("calcKb").setAttribute("aria-pressed", on ? "true" : "false"); inp.blur(); inp.focus(); return; }
+    if (inp.getAttribute("inputmode") === "none") inp.focus();   // shows the caret; no keyboard comes up
   }
   function calcEnter(){
     var inp = el("calcIn"), src = inp.value.trim();
@@ -3506,7 +3624,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       calcLast = calcRun(src); calcShow = 0; calcAt = -1;
       CALC.hist.push({ e: src, r: calcText(calcLast) });
       if (CALC.hist.length > 50) CALC.hist.shift();
-      inp.value = ""; drawHist(); showRes(); drawMem(); saveCalc();
+      inp.value = ""; drawPrev(); drawHist(); showRes(); drawMem(); saveCalc();
     } catch (e){ showRes(e); }
   }
   function calcType(text){   // put text where the caret is, without taking the focus (so a phone's keyboard stays down)
@@ -3538,6 +3656,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       calcType(t);
     }
     if (calcSecond || calcHyp){ calcSecond = calcHyp = false; keyState(); }
+    drawPrev();
+    if (inp.getAttribute("inputmode") === "none") inp.focus();
   }
   function keyState(){
     var box = el("calcKeys");
@@ -3650,7 +3770,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     w.classList.toggle("hidden", !on);
     el("calcBtn").setAttribute("aria-pressed", on ? "true" : "false");
     try { localStorage.setItem(NS + "calcOpen", on ? "1" : "0"); } catch (e){}
-    if (on){ placeCalc(); if (CALC.tab === "calc" && window.innerWidth > 560) el("calcIn").focus(); }
+    if (on){ needKatex(); placeCalc(); if (CALC.tab === "calc" && window.innerWidth > 560) el("calcIn").focus(); }
   }
   function placeCalc(x, y){
     var w = el("calcWin"), pos = null;
@@ -3672,14 +3792,13 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     el("calcKeys").addEventListener("click", function(e){ var b = e.target.closest("[data-k]"); if (b) calcKey(+b.getAttribute("data-k")); });
     inp.addEventListener("keydown", function(e){
       if (e.key === "Enter"){ e.preventDefault(); calcEnter(); }
-      else if ((e.key === "ArrowUp" || e.key === "ArrowDown") && CALC.hist.length){   // earlier lines, as on the TI
-        e.preventDefault();
-        var n = CALC.hist.length;
-        calcAt = e.key === "ArrowUp" ? (calcAt < 0 ? n - 1 : Math.max(0, calcAt - 1)) : (calcAt < 0 || calcAt >= n - 1 ? -1 : calcAt + 1);
-        inp.value = calcAt < 0 ? "" : CALC.hist[calcAt].e; inp.setSelectionRange(inp.value.length, inp.value.length);
-      }
+      else if ((e.key === "ArrowUp" || e.key === "ArrowDown") && CALC.hist.length){ e.preventDefault(); histStep(e.key === "ArrowUp"); }
     });
-    el("calcHist").addEventListener("click", function(e){ var b = e.target.closest("[data-h]"), h = b && CALC.hist[+b.getAttribute("data-h")]; if (h){ inp.value = h.e; inp.focus(); } });
+    inp.addEventListener("input", drawPrev);
+    if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) inp.setAttribute("inputmode", "none");   // on a touch screen the keys do the typing; "abc" brings the keyboard
+    el("calcNav").addEventListener("mousedown", function(e){ e.preventDefault(); });
+    el("calcNav").addEventListener("click", function(e){ var b = e.target.closest("[data-nav]"); if (b) calcNav(b.getAttribute("data-nav")); });
+    el("calcHist").addEventListener("click", function(e){ var b = e.target.closest("[data-h]"), h = b && CALC.hist[+b.getAttribute("data-h")]; if (h){ inp.value = h.e; inp.focus(); drawPrev(); } });
     [["calcAngle", "angle"], ["calcFmt", "fmt"], ["calcCx", "cx"]].forEach(function(x){
       el(x[0]).addEventListener("change", function(){ CALC[x[1]] = el(x[0]).value; showRes(); drawMem(); saveCalc(); });
     });

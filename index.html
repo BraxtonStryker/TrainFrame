@@ -751,6 +751,8 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
     <p><button class="btn sm" id="aiCopyHelp" type="button">Copy AI prompt</button></p>
     <h2>What's new</h2>
     <dl class="versions">
+      <dt>0.6.2 (2026-11-16)</dt>
+      <dd>Fixed: the calculator showed the word "displaystyle" in front of its typeset math.</dd>
       <dt>0.6.1 (2026-11-15)</dt>
       <dd>The calculator draws its math: what you type, the history and the answer show as stacked fractions, roots and powers. On a phone it’s a sheet across the bottom with bigger keys, the keys type without the phone’s keyboard coming up (<b>abc</b> brings it back), and a new row moves the caret and steps through earlier lines.</dd>
       <dt>0.6.0 (2026-11-15)</dt>
@@ -872,7 +874,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
 (function(){
   "use strict";
 
-  var APP_VERSION = "0.6.1";
+  var APP_VERSION = "0.6.2";
   var NS = "trainFrame:";   // every GitHub Pages project of this user shares one origin, so namespace every key
   var UNSORTED = "Unsorted";   // the class tab for files with no class: line
   var el = function(id){ return document.getElementById(id); };
@@ -3577,7 +3579,7 @@ $$ \int_0^2 c\,x^2\,dx = 1 $$</pre>
       .replace(/(\d)E(-?\d+)/g, "$1\\times 10^{$2}").replace(/∠/g, "\\angle ").replace(/∞/g, "\\infty ").replace(/undefined/, "\\text{undefined}");
   }
   function calcMath(make, plain){   // make() gives LaTeX; plain is shown when KaTeX isn't here or can't draw it
-    if (katexState === 2 && window.katex){ try { return window.katex.renderToString("\displaystyle " + make(), { output: "mathml", throwOnError: true, strict: "ignore" }); } catch (e){} }
+    if (katexState === 2 && window.katex){ try { return window.katex.renderToString("\\displaystyle " + make(), { output: "mathml", throwOnError: true, strict: "ignore" }); } catch (e){} }
     return esc(plain);
   }
   function drawHist(){

@@ -386,6 +386,8 @@ def run(p, shots):
     check("the answer and the history are typeset", J("!!document.querySelector('#calcRes math mfrac')") and J("document.querySelectorAll('#calcHist button > span math').length") == 2 and J("!!document.querySelector('#calcHist math mfrac')"),
           J("document.getElementById('calcHist').innerHTML")[:900])
     J("var i = document.getElementById('calcIn'); i.value = 'sqrt(2)/3 + x^2'; i.dispatchEvent(new Event('input'))")
+    check("no LaTeX command names show in the calculator's math", not J("/displaystyle|mathrm|frac|sqrt|times/.test(['calcRes', 'calcHist', 'calcPrev'].map(function(id){ var c = document.getElementById(id).cloneNode(true); c.querySelectorAll('annotation').forEach(function(a){ a.remove(); }); return c.textContent; }).join(' '))"),
+          J("document.getElementById('calcRes').textContent + ' | ' + document.getElementById('calcHist').textContent"))   # KaTeX keeps the source in an <annotation>, which isn't shown
     check("what's typed is typeset as you type", J("!!document.querySelector('#calcPrev math msqrt') && !!document.querySelector('#calcPrev math msup')"), J("document.getElementById('calcPrev').innerHTML")[:200])
     J("var i = document.getElementById('calcIn'); i.value = 'sin(30'; i.dispatchEvent(new Event('input'))")
     check("an open bracket is closed for the picture", "sin" in J("document.getElementById('calcPrev').textContent") and not J("document.getElementById('calcPrev').classList.contains('stale')"))
